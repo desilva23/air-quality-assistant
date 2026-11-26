@@ -1,30 +1,36 @@
-/* Colours, type and spacing, for light and dark themes. Text pairs meet WCAG AA. */
+/* Colours, type and radii for light and dark themes. Text pairs meet WCAG AA. */
 
 :root {
   color-scheme: light dark;
-  --bg: #f6f8fb;
-  --surface: #ffffff;
-  --surface-2: #eef2f7;
-  --text: #17202b;
-  --muted: #4b5767;
-  --border: #d5dce6;
-  --accent: #1e4fbf;
-  --accent-text: #ffffff;
-  --ok: #17663f;
-  --ok-soft: #e4f3ea;
+  --font-heading: var(--font-display), "Baloo 2", system-ui, sans-serif;
+  --font-text: var(--font-body), "Mukta", system-ui, sans-serif;
+
+  --paper: #f2f5f8;
+  --card: #ffffff;
+  --card-2: #eef2f6;
+  --ink: #1b2433;
+  --ink-soft: #4a5568;
+  --line: #d6dde6;
+  --field: #8a96a8;
+  --metro: #11507a;
+  --metro-ink: #ffffff;
+  --leaf: #1f7a52;
+  --leaf-soft: #e3f3ea;
   --warn: #8a3a0c;
   --warn-soft: #fdf0e6;
   --danger: #b42318;
   --danger-soft: #fdecea;
-  --focus: #1e4fbf;
-  --chart-bar: #9fb1c8;
-  --chart-best: #1e4fbf;
-  --chart-grid: #e3e8ef;
-  --chart-limit: #b42318;
-  --radius: 12px;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 4px 16px rgb(0 0 0 / 0.04);
+  --focus: #11507a;
+  --frost: rgb(255 255 255 / 0.62);
+  --frost-line: rgb(255 255 255 / 0.85);
+  --chart-bar: #9fb3c9;
+  --chart-grid: #e1e7ee;
 
-  /* CPCB's band colours, used beside text that names the band, never alone. */
+  --r-panel: 24px;
+  --r-card: 18px;
+  --r-item: 12px;
+
+  /* CPCB's band colours, always next to text that names the band. */
   --aqi-good: #2e9e4f;
   --aqi-satisfactory: #9ccc4c;
   --aqi-moderate: #f2d43d;
@@ -35,26 +41,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #11161d;
-    --surface: #19202a;
-    --surface-2: #232c38;
-    --text: #edf1f6;
-    --muted: #b3bdca;
-    --border: #344050;
-    --accent: #9db8ff;
-    --accent-text: #0d1424;
-    --ok: #6ad6a0;
-    --ok-soft: #16301f;
+    --paper: #0d1420;
+    --card: #152031;
+    --card-2: #1c293d;
+    --ink: #e9eef5;
+    --ink-soft: #b4bfcd;
+    --line: #2c3a50;
+    --field: #6d7d93;
+    --metro: #8cc2ef;
+    --metro-ink: #0b1a2a;
+    --leaf: #7fdcaa;
+    --leaf-soft: #133325;
     --warn: #fdba74;
     --warn-soft: #3a2214;
     --danger: #fca5a5;
     --danger-soft: #3a1818;
-    --focus: #9db8ff;
-    --chart-bar: #4f6079;
-    --chart-best: #9db8ff;
-    --chart-grid: #2a3442;
-    --chart-limit: #fca5a5;
-    --shadow: none;
+    --focus: #8cc2ef;
+    --frost: rgb(13 20 32 / 0.55);
+    --frost-line: rgb(255 255 255 / 0.12);
+    --chart-bar: #43566f;
+    --chart-grid: #233044;
     --aqi-good: #3fb866;
     --aqi-satisfactory: #a6d65a;
     --aqi-moderate: #f5dc55;

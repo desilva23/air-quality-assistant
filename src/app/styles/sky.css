@@ -1,0 +1,264 @@
+/* The sky band: its colour is today's air over the chosen place, from clear
+   blue to smoky mauve, fading into the page. Text stays dark on light skies
+   and light on night skies, at AA contrast or better. */
+
+.sky {
+  --sky-top: #d8e6f3;
+  --sky-mid: #e9f0f7;
+  --haze: transparent;
+  position: relative;
+  isolation: isolate;
+  background-color: var(--paper);
+  background-image: linear-gradient(
+    180deg,
+    var(--sky-top) 0,
+    var(--sky-mid) 340px,
+    var(--paper) 720px
+  );
+  background-repeat: no-repeat;
+}
+
+.sky::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 720px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 45% at 85% 12%, rgb(255 255 255 / 0.5), transparent 70%),
+    radial-gradient(45% 35% at 8% 70%, var(--haze), transparent 75%),
+    radial-gradient(35% 30% at 60% 55%, var(--haze), transparent 75%);
+}
+
+.sky-good {
+  --sky-top: #b9dcfb;
+  --sky-mid: #ddeefc;
+}
+.sky-satisfactory {
+  --sky-top: #c8e7d3;
+  --sky-mid: #e3f2e8;
+}
+.sky-moderate {
+  --sky-top: #ece0ae;
+  --sky-mid: #f4eed4;
+  --haze: rgb(214 190 120 / 0.3);
+}
+.sky-poor {
+  --sky-top: #e9c79c;
+  --sky-mid: #f2e2cc;
+  --haze: rgb(196 140 80 / 0.3);
+}
+.sky-very-poor {
+  --sky-top: #dcc2b0;
+  --sky-mid: #ece0d7;
+  --haze: rgb(140 100 80 / 0.32);
+}
+.sky-severe {
+  --sky-top: #d6bdb9;
+  --sky-mid: #e9dcda;
+  --haze: rgb(120 70 70 / 0.34);
+}
+
+@media (prefers-color-scheme: dark) {
+  .sky {
+    --sky-top: #13263d;
+    --sky-mid: #101b2b;
+  }
+  .sky::before {
+    background:
+      radial-gradient(45% 35% at 8% 70%, var(--haze), transparent 75%),
+      radial-gradient(35% 30% at 60% 55%, var(--haze), transparent 75%);
+  }
+  .sky-good {
+    --sky-top: #0f3557;
+    --sky-mid: #0f2236;
+  }
+  .sky-satisfactory {
+    --sky-top: #123a30;
+    --sky-mid: #0f2124;
+  }
+  .sky-moderate {
+    --sky-top: #3a3418;
+    --sky-mid: #1b1d1d;
+    --haze: rgb(214 190 120 / 0.12);
+  }
+  .sky-poor {
+    --sky-top: #45301a;
+    --sky-mid: #1d1b1c;
+    --haze: rgb(196 140 80 / 0.14);
+  }
+  .sky-very-poor {
+    --sky-top: #43291f;
+    --sky-mid: #1d1a1d;
+    --haze: rgb(170 110 90 / 0.15);
+  }
+  .sky-severe {
+    --sky-top: #3f1f22;
+    --sky-mid: #1c171b;
+    --haze: rgb(170 80 80 / 0.16);
+  }
+}
+
+/* Softer text needs a darker tone over the light skies to keep AA contrast. */
+@media (prefers-color-scheme: light) {
+  .sky-inner {
+    --ink-soft: #343d4c;
+  }
+}
+
+.sky-inner {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem) clamp(1.5rem, 4vw, 3rem);
+  align-items: start;
+  padding-block: clamp(1rem, 4vw, 2.5rem) clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.where {
+  max-width: 46rem;
+}
+
+/* Desktop: headline and search on the left, today's reading beside them. Phones
+   keep the order of the page: headline, reading, search. */
+@media (min-width: 960px) {
+  .sky-inner:has(.sky-reading) {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-areas:
+      "intro reading"
+      "where reading";
+  }
+
+  .sky-inner:has(.sky-reading) .intro {
+    grid-area: intro;
+  }
+  .sky-inner:has(.sky-reading) .where {
+    grid-area: where;
+  }
+  .sky-inner:has(.sky-reading) .sky-reading {
+    grid-area: reading;
+  }
+}
+
+.where h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.sky-reading {
+  background: var(--frost);
+  border: 1px solid var(--frost-line);
+  border-radius: var(--r-panel);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 40px rgb(27 36 51 / 0.12);
+}
+
+.sky-place {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.aqi-headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+
+.aqi-number {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(4.5rem, 11vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.aqi-label {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.aqi-scale {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.aqi-scale li {
+  height: 10px;
+  border-radius: 5px;
+  opacity: 0.35;
+}
+
+.aqi-scale li.current {
+  opacity: 1;
+  height: 16px;
+  margin-top: -3px;
+  box-shadow: 0 0 0 2px var(--card);
+}
+
+.band-good {
+  background: var(--aqi-good);
+}
+.band-satisfactory {
+  background: var(--aqi-satisfactory);
+}
+.band-moderate {
+  background: var(--aqi-moderate);
+}
+.band-poor {
+  background: var(--aqi-poor);
+}
+.band-very-poor {
+  background: var(--aqi-very-poor);
+}
+.band-severe {
+  background: var(--aqi-severe);
+}
+
+.sky-source {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.sky-note,
+.sky-waiting {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.dashboard {
+  display: grid;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+}
+
+@media (min-width: 960px) {
+  .dashboard {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: start;
+  }
+
+  .span-all,
+  .dashboard:not(:has(.air-card)) .household-card {
+    grid-column: 1 / -1;
+  }
+}
+
+/* With room to spare, the household questions sit side by side. */
+.household {
+  display: grid;
+  gap: 0 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));
+  align-items: start;
+}
+
+.household > p {
+  grid-column: 1 / -1;
+}

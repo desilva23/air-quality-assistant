@@ -21,9 +21,9 @@ Last local run: 26 November 2026.
 | Route factories, guards, stores, CSP | `tests/server` | 31 | Passed |
 | API routes and app shell | `tests/app` | 7 | Passed |
 | Browser client, saved settings, location | `tests/client` | 14 | Passed |
-| UI flows with axe | `tests/ui` | 23 | Passed |
+| UI flows with axe | `tests/ui` | 29 | Passed |
 | Project hygiene | `tests/quality` | 8 | Passed |
-| **Unit and integration total** | | **204** | **All passed** |
+| **Unit and integration total** | | **210** | **All passed** |
 | End to end in real Chromium | `e2e/` | 12 | All passed |
 
 | Coverage (`src/`) | Result | Enforced in CI |

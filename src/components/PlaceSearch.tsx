@@ -4,6 +4,7 @@ import { useId, useState, type SubmitEvent } from "react";
 import { searchPlaces, useApiCall } from "@/lib/client/api";
 import { useDeviceLocation } from "@/lib/client/geolocation";
 import type { Place } from "@/lib/domain/air";
+import { Icon } from "./Icon";
 
 export interface PlaceSearchProps {
   onSelect: (place: Place) => void;
@@ -53,6 +54,7 @@ export function PlaceSearch({ onSelect }: PlaceSearchProps) {
           />
         </div>
         <button type="submit" className="button primary" disabled={search.loading}>
+          <Icon name="search" />
           Search
         </button>
       </form>
@@ -62,6 +64,7 @@ export function PlaceSearch({ onSelect }: PlaceSearchProps) {
         onClick={device.locate}
         disabled={device.locating}
       >
+        <Icon name="pin" />
         {device.locating ? "Finding you…" : "Use my location"}
       </button>
       <p role="status" className="status">

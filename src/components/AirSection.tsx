@@ -14,8 +14,12 @@ export interface AirSectionProps {
 /** Live air for the chosen place, with loading and failure states. */
 export function AirSection({ place, status, report, error, onRetry }: AirSectionProps) {
   return (
-    <section aria-labelledby="air-heading" className="card" aria-busy={status === "loading"}>
-      <h2 id="air-heading">2. Air in {place.name} now</h2>
+    <section
+      aria-labelledby="air-heading"
+      className="card air-card"
+      aria-busy={status === "loading"}
+    >
+      <h2 id="air-heading">Air in {place.name} now</h2>
       {status === "loading" && <p role="status">Fetching live air data…</p>}
       {status === "error" && (
         <div role="alert" className="error-box">

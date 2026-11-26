@@ -3,7 +3,7 @@ import { axeViolations, expect, openDelhiFamily, stubAirData, test } from "./fix
 test("a family gets live air, a personal plan with impacts, and an answer", async ({ page }) => {
   await openDelhiFamily(page);
   await expect(page.getByText("OpenAQ (CPCB)")).toBeVisible();
-  await expect(page.getByText("ITO, Delhi, 3.2 km away")).toBeVisible();
+  await expect(page.getByText("ITO, Delhi, 3.2 km away", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Children under 12")).toBeChecked();
 
   await page.getByRole("button", { name: "Build today's plan" }).click();
@@ -54,10 +54,10 @@ test("a town can be found by name, and answers are remembered on reload", async 
   await page.getByLabel("Town or city").fill("Noida");
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("button", { name: "Noida, Uttar Pradesh" }).click();
-  await expect(page.getByRole("heading", { name: "2. Air in Noida now" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Air in Noida now" })).toBeVisible();
   await page.getByLabel("Adults over 60").check();
 
   await page.reload();
-  await expect(page.getByRole("heading", { name: "2. Air in Noida now" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Air in Noida now" })).toBeVisible();
   await expect(page.getByLabel("Adults over 60")).toBeChecked();
 });

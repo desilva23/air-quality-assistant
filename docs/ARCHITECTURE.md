@@ -52,3 +52,4 @@ flowchart LR
 - **No accounts or database.** The household and place live in localStorage. The server keeps only short-lived caches and rate-limit counters.
 - **One AI provider.** Groq, with GPT-OSS models: strict structured output, and a fast lite tier for questions.
 - **One deploy target.** Vercel in `bom1` (Mumbai), the region closest to the users.
+- **The interface shows the air.** The opening band takes the colour of today's AQI band. The fonts (Baloo 2 and Mukta, from the Mumbai foundry Ek Type) are self-hosted through `next/font`, so the CSP stays `'self'`.

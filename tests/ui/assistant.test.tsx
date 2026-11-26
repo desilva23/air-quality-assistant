@@ -44,7 +44,7 @@ describe("AssistantApp", () => {
 
     await user.click(screen.getByRole("button", { name: /Delhi family/ }));
     expect(
-      await screen.findByRole("heading", { name: "2. Air in New Delhi now" }),
+      await screen.findByRole("heading", { name: "Air in New Delhi now" }),
     ).toBeInTheDocument();
     expect(await screen.findByText("323")).toBeInTheDocument();
     expect(screen.getByLabelText("Children under 12")).toBeChecked();
@@ -78,7 +78,7 @@ describe("AssistantApp", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
     const results = await screen.findByRole("list", { name: "Matching places" });
     await user.click(within(results).getByRole("button", { name: "Noida, Uttar Pradesh" }));
-    expect(await screen.findByRole("heading", { name: "2. Air in Noida now" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Air in Noida now" })).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Matching places" })).not.toBeInTheDocument();
   });
 

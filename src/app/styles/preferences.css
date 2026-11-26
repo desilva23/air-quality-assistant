@@ -11,15 +11,16 @@
 }
 
 @media (prefers-contrast: more) {
-  :root {
-    --muted: var(--text);
-    --border: var(--text);
-    --chart-bar: var(--muted);
+  :root,
+  .sky-inner {
+    --ink-soft: var(--ink);
+    --line: var(--ink);
+    --frost-line: var(--ink);
   }
 
   .aqi-scale li {
     opacity: 1;
-    outline: 1px solid var(--text);
+    outline: 1px solid var(--ink);
   }
 }
 
@@ -35,13 +36,8 @@
     background: Highlight;
   }
 
-  .aqi {
-    border-left-color: CanvasText;
-  }
-
-  .hero,
-  .hero-points li {
-    border: 1px solid CanvasText;
+  .part {
+    border-top-color: CanvasText;
   }
 
   .button,
@@ -49,7 +45,9 @@
   .sample,
   .ai-status,
   .source-note,
-  .note {
+  .note,
+  .impact,
+  .sky-reading {
     border: 1px solid ButtonText;
   }
 }

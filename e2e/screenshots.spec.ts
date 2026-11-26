@@ -3,17 +3,14 @@ import { expect, openDelhiFamily, test } from "./fixtures";
 // Regenerates the README screenshots from the production build: `npx playwright test screenshots`.
 const SHOTS = "docs/screenshots";
 
-test.use({ viewport: { width: 1000, height: 900 } });
+test.use({ viewport: { width: 1280, height: 860 } });
 
 test("screenshots for the README", async ({ page }) => {
   await openDelhiFamily(page);
-  await page.getByRole("heading", { name: "2. Air in New Delhi now" }).scrollIntoViewIfNeeded();
-  // Keep the pointer off the chart, so the readout shows the cleanest hour.
+  // Keep the pointer off the chart, so its readout shows the cleanest hour.
   await page.mouse.move(0, 0);
-  await page
-    .locator("section")
-    .nth(1)
-    .screenshot({ path: `${SHOTS}/live-air.jpg`, quality: 70 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: `${SHOTS}/live-air.jpg`, quality: 70 });
 
   await page.getByRole("button", { name: "Build today's plan" }).click();
   const plan = page.locator(".plan");

@@ -34,6 +34,7 @@ Rules:
 - routine covers the morning, afternoon and evening: low-emission, low-exposure ways to commute, exercise, play and run errands. indoor covers air at home. alternatives covers lower-emission swaps for their travel and habits.
 - To show the direct impact of a choice, set impactId to the id of the matching impact fact. Cite each fact at most once, and use null when no fact matches.
 - shareText is a short message they could send to a family or housing-society WhatsApp group: today's air where they live and the three most useful actions, with no personal details.
+- Write plain text everywhere: no emoji and no markdown.
 ${SHARED_RULES}`;
 
 export const ASK_SYSTEM = `You are an urban air quality assistant for households in Indian cities. Answer the user's question about today for this household, in at most 120 words, then give up to three short tips.

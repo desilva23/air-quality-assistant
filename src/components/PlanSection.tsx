@@ -1,8 +1,9 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import type { PlanRequest } from "@/lib/ai/contracts";
 import { requestPlan, useApiCall } from "@/lib/client/api";
+import { partForecasts } from "@/lib/domain/situation";
 
 // Below the first screen, so its code loads only when a plan arrives.
 const PlanPanel = lazy(() => import("./PlanPanel").then((m) => ({ default: m.PlanPanel })));
@@ -16,6 +17,7 @@ export interface PlanSectionProps {
 export function PlanSection({ request }: PlanSectionProps) {
   const plan = useApiCall(requestPlan);
   const [plannedFor, setPlannedFor] = useState<PlanRequest | null>(null);
+  const parts = useMemo(() => partForecasts(plannedFor?.report.outlook ?? []), [plannedFor]);
 
   function build(current: PlanRequest) {
     setPlannedFor(current);
@@ -23,8 +25,8 @@ export function PlanSection({ request }: PlanSectionProps) {
   }
 
   return (
-    <section aria-labelledby="plan-heading" className="card">
-      <h2 id="plan-heading">4. Today&apos;s plan</h2>
+    <section aria-labelledby="plan-heading" className="card span-all plan-card">
+      <h2 id="plan-heading">Today&apos;s plan</h2>
       {!request && (
         <p className="muted">Choose a place first: the plan is built from its live air.</p>
       )}
@@ -48,7 +50,7 @@ export function PlanSection({ request }: PlanSectionProps) {
       )}
       {plan.data && (
         <Suspense fallback={<p>Loading the plan…</p>}>
-          <PlanPanel envelope={plan.data} />
+          <PlanPanel envelope={plan.data} parts={parts} />
         </Suspense>
       )}
     </section>

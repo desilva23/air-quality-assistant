@@ -7,6 +7,7 @@ import { PlaceSearch } from "@/components/PlaceSearch";
 import { PlanPanel } from "@/components/PlanPanel";
 import { SourceNote } from "@/components/SourceNote";
 import { planFallback } from "@/lib/ai/fallbacks/plan";
+import { partForecasts } from "@/lib/domain/situation";
 import { axeViolations } from "../support/axe";
 import { json, stubFetch } from "../support/fetch";
 import { planRequest } from "../support/fixtures";
@@ -66,10 +67,12 @@ describe("PlanPanel", () => {
     data: planFallback(planRequest()),
     notice: "Built-in guidance.",
   };
+  const parts = partForecasts(planRequest().report.outlook);
 
   it("shows every part of the plan with its computed impact", async () => {
-    const { container } = render(<PlanPanel envelope={envelope} />);
-    expect(screen.getByRole("heading", { level: 5, name: "Evening" })).toBeInTheDocument();
+    const { container } = render(<PlanPanel envelope={envelope} parts={parts} />);
+    expect(screen.getByRole("heading", { level: 4, name: "Evening" })).toBeInTheDocument();
+    expect(screen.getByText("Very poor air, PM2.5 around 200 µg/m³")).toBeInTheDocument();
     expect(
       screen.getByText(/cuts the PM2.5 you breathe during it by about 67%/),
     ).toBeInTheDocument();
@@ -77,11 +80,19 @@ describe("PlanPanel", () => {
     expect(await axeViolations(container)).toEqual([]);
   });
 
+  it("leaves out the forecast line for parts of the day it doesn't cover", () => {
+    const { container } = render(
+      <PlanPanel envelope={envelope} parts={{ morning: null, afternoon: null, evening: null }} />,
+    );
+    expect(screen.queryByText(/air, PM2.5 around/)).not.toBeInTheDocument();
+    expect(container.querySelectorAll(".part-unknown")).toHaveLength(3);
+  });
+
   it("copies the share message, or explains when copying isn't allowed", async () => {
     const user = userEvent.setup();
     const writeText = vi.fn(() => Promise.resolve());
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
-    render(<PlanPanel envelope={envelope} />);
+    render(<PlanPanel envelope={envelope} parts={parts} />);
     await user.click(screen.getByRole("button", { name: "Copy message" }));
     expect(writeText).toHaveBeenCalledWith(envelope.data.plan.shareText);
     expect(

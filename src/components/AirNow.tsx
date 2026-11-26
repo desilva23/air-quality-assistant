@@ -2,30 +2,13 @@
 
 import { memo, useMemo } from "react";
 import type { AirReport, Reading } from "@/lib/domain/air";
-import {
-  AQI_CATEGORIES,
-  CATEGORY_HEALTH,
-  CATEGORY_LABEL,
-  indianAqi,
-  type AqiCategory,
-} from "@/lib/domain/aqi";
+import { CATEGORY_HEALTH, indianAqi } from "@/lib/domain/aqi";
 import { cigarettesPerDay, WHO_PM25_DAILY, whoMultiple } from "@/lib/domain/exposure";
 import { formatClock } from "@/lib/domain/time";
 import { OutlookChart } from "./OutlookChart";
 
 export interface AirNowProps {
   report: AirReport;
-}
-
-/** The six bands of the index, with today's marked. Decorative: the category is also in text. */
-function AqiScale({ category }: { category: AqiCategory }) {
-  return (
-    <ol className="aqi-scale" aria-hidden="true">
-      {AQI_CATEGORIES.map((band) => (
-        <li key={band} className={`band-${band}${band === category ? " current" : ""}`} />
-      ))}
-    </ol>
-  );
 }
 
 function SourceDetails({ reading }: { reading: Reading }) {
@@ -35,25 +18,25 @@ function SourceDetails({ reading }: { reading: Reading }) {
       : "Model estimate for this spot";
   return (
     <dl className="readings">
-      <div>
+      <div className="tile">
         <dt>PM2.5</dt>
         <dd>{Math.round(reading.pm25)} µg/m³</dd>
       </div>
       {reading.pm10 !== null && (
-        <div>
+        <div className="tile">
           <dt>PM10</dt>
           <dd>{Math.round(reading.pm10)} µg/m³</dd>
         </div>
       )}
-      <div>
+      <div className="tile wide">
         <dt>Source</dt>
         <dd>{reading.source}</dd>
       </div>
-      <div>
+      <div className="tile wide">
         <dt>Where</dt>
         <dd>{where}</dd>
       </div>
-      <div>
+      <div className="tile">
         <dt>{reading.kind === "station" ? "Measured" : "For"}</dt>
         <dd>
           <time dateTime={reading.measuredAt}>{formatClock(reading.measuredAt)} IST</time>
@@ -63,7 +46,7 @@ function SourceDetails({ reading }: { reading: Reading }) {
   );
 }
 
-/** Today's index, what it means for health, and exactly where the numbers came from. */
+/** What today's air means for health, exactly where the numbers came from, and the day ahead. */
 export const AirNow = memo(function AirNow({ report }: AirNowProps) {
   const { reading } = report;
   const aqi = useMemo(() => indianAqi(reading), [reading]);
@@ -72,17 +55,6 @@ export const AirNow = memo(function AirNow({ report }: AirNowProps) {
 
   return (
     <div className="air-now">
-      <div className={`aqi aqi-${aqi.category}`}>
-        <p className="aqi-headline" role="status">
-          <span className="aqi-number">{aqi.value}</span>
-          <span className="aqi-label">{CATEGORY_LABEL[aqi.category]}</span>
-        </p>
-        <AqiScale category={aqi.category} />
-        <p className="muted small">
-          Indicative AQI on India&apos;s national scale (0–500), set by{" "}
-          {aqi.dominant === "pm25" ? "PM2.5" : "PM10"}.
-        </p>
-      </div>
       <p className="health">{CATEGORY_HEALTH[aqi.category]}</p>
       <p className="who">
         {who > 1 ? (

@@ -10,8 +10,6 @@ import { MODEL_READING, outlookFrom, report } from "../support/fixtures";
 describe("AirNow", () => {
   it("shows the index, its meaning, and exactly where and when it was measured", async () => {
     const { container } = render(<AirNow report={report()} />);
-    expect(screen.getByText("323")).toBeInTheDocument();
-    expect(screen.getByText("Very poor", { selector: ".aqi-label" })).toBeInTheDocument();
     expect(screen.getByText("Respiratory illness on prolonged exposure.")).toBeInTheDocument();
     expect(screen.getByText("OpenAQ (CPCB)")).toBeInTheDocument();
     expect(screen.getByText("ITO, Delhi, 3.2 km away")).toBeInTheDocument();
@@ -38,7 +36,6 @@ describe("AirNow", () => {
     expect(screen.getByText(/WHO 24-hour guideline/)).toHaveTextContent("PM2.5 is 2×");
     expect(screen.getByText("For")).toBeInTheDocument();
     expect(screen.getByText("No station nearby.")).toBeInTheDocument();
-    expect(screen.getByText(/set by PM10/)).toBeInTheDocument();
     model.unmount();
     const noPm10 = render(
       <AirNow report={report({ reading: { ...MODEL_READING, pm25: 12, pm10: null } })} />,

@@ -1,7 +1,7 @@
 # Urban Air Quality Assistant
 
 [![CI](https://github.com/desilva23/air-quality-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/desilva23/air-quality-assistant/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-204%20unit%20%2B%2012%20e2e-2f6b45)
+![Tests](https://img.shields.io/badge/tests-210%20unit%20%2B%2012%20e2e-2f6b45)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-2f6b45)
 ![a11y](https://img.shields.io/badge/axe-0%20violations-2f6b45)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
@@ -11,7 +11,7 @@
 A GenAI assistant for Indian households living through winter smog. It reads **live** air quality for any town in India, then builds the family's day around it: when to go out, how to commute, what to do at home, and the **direct impact of each choice** in numbers the app computes rather than the AI guesses.
 
 <p align="center">
-  <img src="docs/screenshots/live-air.jpg" alt="Live air for New Delhi: AQI 323, Very poor, from a CPCB station 3.2 km away, with a 24-hour PM2.5 forecast whose cleanest hour is highlighted" width="49%" />
+  <img src="docs/screenshots/live-air.jpg" alt="The opening screen for New Delhi: the sky band has turned smoky brown for a Very poor AQI of 323, measured at a CPCB station 3.2 km away, beside the town search and three example households" width="49%" />
   <img src="docs/screenshots/plan.jpg" alt="Today's plan for a Delhi family: morning, afternoon and evening actions, each with its reason and computed impact, such as a 67% lower dose from moving the children's play to 2 pm" width="49%" />
 </p>
 
@@ -41,7 +41,7 @@ A parent in Delhi, Noida, Kolkata or Mumbai wakes to an AQI of 300+. Should the 
 ### Try it in two minutes (sample inputs)
 
 1. Open the live site and press **Delhi family** under *Where are you?* This loads a household with two young children who play outside in the evening and a parent who drives 15 km to work. The air is fetched live.
-2. Read **Air in New Delhi now**: the AQI on India's national scale, CPCB's health note, the source and time, and the 24-hour PM2.5 forecast with the cleanest hour highlighted.
+2. Watch the sky band at the top take the colour of today's air (clear blue, haze or smoke) beside the AQI on India's national scale, with its station and time. Below, **Air in New Delhi now** gives CPCB's health note, the WHO comparison and the 24-hour PM2.5 forecast with the cleanest hour highlighted.
 3. Press **Build today's plan**. The evening play moves to the cleaner afternoon window with its dose cut, the commute swaps show weekly CO₂ savings, and the indoor tips fit a home without a purifier.
 4. Press **Mumbai commuter** or **Kolkata seniors** and build again. The same day gives different advice: an N95 for the scooter ride, or a gentler, purifier-first plan for a couple where one has asthma.
 5. Under **Ask about today**, try "Can my kids play outside this evening?"
@@ -127,7 +127,7 @@ Requires Node 22.
 npm ci
 cp .env.example .env.local   # all keys are optional; without them the app uses the CAMS model and built-in guidance
 npm run dev                  # http://localhost:3000
-npm run check                # format, strict lint, Knip, typecheck, 204 tests with 100% coverage
+npm run check                # format, strict lint, Knip, typecheck, 210 tests with 100% coverage
 npx playwright install chromium
 npm run test:e2e             # production build in Chromium: journeys, CSP, axe in light and dark, 320 px reflow
 ```
@@ -173,7 +173,7 @@ Every phrase of the brief maps to a feature in [What it does](#what-it-does). Li
 
 ### Testing
 
-- **Unit and integration:** 204 Vitest tests across the domain, air data, AI, server, client, UI and hygiene suites. The gate is 100% statement, branch, function and line coverage, enforced in CI.
+- **Unit and integration:** 210 Vitest tests across the domain, air data, AI, server, client, UI and hygiene suites. The gate is 100% statement, branch, function and line coverage, enforced in CI.
 - **Accessibility in tests:** axe runs in the component tests.
 - **Browser:** 12 Playwright tests on the production build cover the journeys, personalisation, persistence, CSP and headers, API refusals, axe in light and dark, and 320 px reflow.
 
@@ -184,7 +184,7 @@ Details are in [docs/TESTING.md](docs/TESTING.md).
 - **Structure:** landmarks and a skip link.
 - **Forms:** labelled controls, with choices grouped in fieldsets.
 - **Feedback:** live regions for results, and focus moves to a new plan.
-- **Colour and charts:** AQI bands are always named in text. The chart has a text summary and a table view.
+- **Colour and charts:** AQI bands are always named in text, and the sky band's colour is decorative. The chart has a text summary and a table view.
 - **Contrast and preferences:** AA contrast in light and dark, plus `prefers-reduced-motion`, `prefers-contrast: more` and `forced-colors` support.
 - **Layout:** 44 px targets, and no sideways scroll at 320 px.
 
@@ -197,7 +197,7 @@ Details are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 | Code quality | strictTypeChecked with zero findings; no casts, `any` or non-null assertions; files under 250 lines; pure domain; shared Zod contracts; typed errors | `src/lib/domain`, `src/lib/client/api.ts`, `eslint.config.mjs`, `tests/quality/hygiene.test.ts`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Security | Server-only keys, same-origin + shared rate limit + size cap + Zod on every route, CSP nonce, prompt fencing, code-only errors, CodeQL | [SECURITY.md](SECURITY.md), `src/proxy.ts`, `src/lib/server/` |
 | Efficiency | Redis cache with `X-Cache: HIT`, parallel upstream calls with timeouts, AI only on request, memoised and lazy UI | `src/lib/server/stores.ts`, `src/lib/air/report.ts`, `src/components/AssistantApp.tsx` |
-| Testing | 204 unit and integration tests, 100% coverage enforced, 12 Playwright tests with axe | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |
+| Testing | 210 unit and integration tests, 100% coverage enforced, 12 Playwright tests with axe | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |
 | Accessibility | WCAG 2.2 AA target, axe in jsdom and Chromium (light and dark), reflow, preferences | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md), `src/app/styles/preferences.css` |
 | Problem statement alignment | Live data for any town in India, personal routines, indoor tips, alternatives and computed impacts | [What it does](#what-it-does), `src/lib/domain/impacts.ts` |
 

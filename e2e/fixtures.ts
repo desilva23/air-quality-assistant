@@ -54,7 +54,7 @@ export async function openDelhiFamily(page: Page): Promise<void> {
   await stubAirData(page);
   await page.goto("/");
   await page.getByRole("button", { name: /Delhi family/ }).click();
-  await expect(page.getByRole("heading", { name: "2. Air in New Delhi now" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Air in New Delhi now" })).toBeVisible();
   await expect(page.getByText("323", { exact: true })).toBeVisible();
 }
 

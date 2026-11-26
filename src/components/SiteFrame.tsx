@@ -1,3 +1,7 @@
+import type { ReactNode } from "react";
+import type { AqiCategory } from "@/lib/domain/aqi";
+import { Icon } from "./Icon";
+
 export interface SiteHeaderProps {
   aiEnabled: boolean;
 }
@@ -5,7 +9,12 @@ export interface SiteHeaderProps {
 export function SiteHeader({ aiEnabled }: SiteHeaderProps) {
   return (
     <header className="site-header">
-      <p className="brand">Urban Air Quality Assistant</p>
+      <p className="brand">
+        <span className="brand-mark">
+          <Icon name="wind" />
+        </span>
+        Urban Air Quality Assistant
+      </p>
       <p className={`ai-status ${aiEnabled ? "on" : "off"}`}>
         {aiEnabled ? "AI on (Groq)" : "AI off: built-in guidance"}
       </p>
@@ -13,20 +22,25 @@ export function SiteHeader({ aiEnabled }: SiteHeaderProps) {
   );
 }
 
-/** The first thing on the page: what the assistant does, in one look. */
-export function Hero() {
+export interface SkyBandProps {
+  /** Today's air, which sets the band's colour; null until a reading arrives. */
+  category: AqiCategory | null;
+  children: ReactNode;
+}
+
+/** The opening band. Its colour is the sky over the chosen place: clear, hazy or smoky. */
+export function SkyBand({ category, children }: SkyBandProps) {
+  return <div className={`sky sky-${category ?? "unknown"}`}>{children}</div>;
+}
+
+export function Intro() {
   return (
-    <div className="hero">
+    <div className="intro">
       <h1>Plan a cleaner-air day for your household</h1>
       <p className="lede">
-        Live air quality for any town in India, a plan for your family&apos;s day around the smog,
-        and what each choice changes for your lungs, the air and your wallet.
+        See the air outside right now, anywhere in India. Then get a plan for your family&apos;s
+        day: when to go out, how to travel and what to do at home, with what each choice saves.
       </p>
-      <ul className="hero-points" aria-label="What you get">
-        <li>Live CPCB station data</li>
-        <li>A plan for who lives with you</li>
-        <li>The impact of every choice</li>
-      </ul>
     </div>
   );
 }

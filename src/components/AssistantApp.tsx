@@ -1,16 +1,20 @@
 "use client";
 
 import { lazy, Suspense, useCallback, useEffect, useMemo } from "react";
+import type { Place } from "@/lib/domain/air";
 import type { PlanRequest } from "@/lib/ai/contracts";
 import { fetchAir, useApiCall } from "@/lib/client/api";
+import { useRevealWhenReady } from "@/lib/client/reveal";
 import { useHousehold, usePlace } from "@/lib/client/saved";
+import { indianAqi } from "@/lib/domain/aqi";
 import type { Sample } from "@/lib/samples";
 import { AirSection } from "./AirSection";
 import { HouseholdForm } from "./HouseholdForm";
 import { PlaceSearch } from "./PlaceSearch";
 import { PlanSection } from "./PlanSection";
 import { SampleProfiles } from "./SampleProfiles";
-import { Hero, SiteFooter, SiteHeader } from "./SiteFrame";
+import { Intro, SiteFooter, SiteHeader, SkyBand } from "./SiteFrame";
+import { SkyReading } from "./SkyReading";
 
 // Shown only once live air has loaded, so its code loads then too.
 const AskPanel = lazy(() => import("./AskPanel").then((m) => ({ default: m.AskPanel })));
@@ -32,52 +36,77 @@ export function AssistantApp({ aiEnabled }: AssistantAppProps) {
   }, [place, loadAir]);
 
   const report = air.status === "done" ? air.data : undefined;
+  const aqi = useMemo(() => (report ? indianAqi(report.reading) : null), [report]);
   const request = useMemo<PlanRequest | null>(
     () => (place && report ? { place, household, report } : null),
     [place, household, report],
   );
 
+  const { targetRef: readingRef, ask: askToReveal } = useRevealWhenReady(aqi !== null);
+
+  const choosePlace = useCallback(
+    (next: Place) => {
+      askToReveal();
+      setPlace(next);
+    },
+    [askToReveal, setPlace],
+  );
+
   const pickSample = useCallback(
     (sample: Sample) => {
       setHousehold(sample.household);
-      setPlace(sample.place);
+      choosePlace(sample.place);
     },
-    [setHousehold, setPlace],
+    [setHousehold, choosePlace],
   );
 
   return (
     <>
-      <SiteHeader aiEnabled={aiEnabled} />
-      <main id="main" tabIndex={-1} className="container">
-        <Hero />
-        <section aria-labelledby="where-heading" className="card">
-          <h2 id="where-heading">1. Where are you?</h2>
-          <PlaceSearch onSelect={setPlace} />
-          <SampleProfiles onPick={pickSample} />
-        </section>
-        {place && (
-          <AirSection
-            place={place}
-            status={air.status}
-            report={report}
-            error={air.error}
-            onRetry={() => void loadAir(place)}
-          />
-        )}
-        <section aria-labelledby="household-heading" className="card">
-          <h2 id="household-heading">3. Your household</h2>
-          <HouseholdForm value={household} onChange={setHousehold} />
-        </section>
-        <PlanSection request={request} />
-        {request && (
-          <section aria-labelledby="ask-heading" className="card">
-            <h2 id="ask-heading">5. Ask about today</h2>
-            <Suspense fallback={<p>Loading…</p>}>
-              <AskPanel context={request} />
-            </Suspense>
-          </section>
-        )}
-      </main>
+      <SkyBand category={aqi?.category ?? null}>
+        <SiteHeader aiEnabled={aiEnabled} />
+        <main id="main" tabIndex={-1}>
+          <div className="sky-inner">
+            <Intro />
+            {place && (
+              <SkyReading
+                ref={readingRef}
+                place={place}
+                aqi={aqi}
+                reading={report?.reading ?? null}
+              />
+            )}
+            <section aria-labelledby="where-heading" className="where">
+              <h2 id="where-heading">Where are you?</h2>
+              <PlaceSearch onSelect={choosePlace} />
+              <SampleProfiles onPick={pickSample} />
+            </section>
+          </div>
+          <div className="dashboard">
+            {place && (
+              <AirSection
+                place={place}
+                status={air.status}
+                report={report}
+                error={air.error}
+                onRetry={() => void loadAir(place)}
+              />
+            )}
+            <section aria-labelledby="household-heading" className="card household-card">
+              <h2 id="household-heading">Your household</h2>
+              <HouseholdForm value={household} onChange={setHousehold} />
+            </section>
+            <PlanSection request={request} />
+            {request && (
+              <section aria-labelledby="ask-heading" className="card span-all">
+                <h2 id="ask-heading">Ask about today</h2>
+                <Suspense fallback={<p>Loading…</p>}>
+                  <AskPanel context={request} />
+                </Suspense>
+              </section>
+            )}
+          </div>
+        </main>
+      </SkyBand>
       <SiteFooter />
     </>
   );

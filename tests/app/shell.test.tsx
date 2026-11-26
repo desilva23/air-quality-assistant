@@ -7,6 +7,11 @@ import { ErrorScreen } from "@/components/ErrorScreen";
 
 vi.mock("next/server", () => ({ connection: vi.fn(() => Promise.resolve()) }));
 vi.mock("@/app/globals.css", () => ({}));
+// next/font is a build-time transform; here each font is just its CSS variable class.
+vi.mock("next/font/google", () => ({
+  Baloo_2: () => ({ variable: "font-display" }),
+  Mukta: () => ({ variable: "font-body" }),
+}));
 
 describe("app shell", () => {
   it("sets the language, a skip link and the page's description", () => {
@@ -15,7 +20,7 @@ describe("app shell", () => {
         <p>content</p>
       </RootLayout>,
     );
-    expect(html).toContain('<html lang="en-IN">');
+    expect(html).toContain('<html lang="en-IN" class="font-display font-body">');
     expect(html).toContain('<a href="#main" class="skip-link">Skip to content</a>');
     expect(metadata.title).toBe("Urban Air Quality Assistant");
     expect(viewport.themeColor).toHaveLength(2);
