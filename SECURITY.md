@@ -10,7 +10,7 @@ Fixes go to `main`, which is what the live app (https://air-quality-assistant-th
 
 ## How the app is protected
 
-- API keys (Groq, OpenAQ, Upstash) are read only on the server, in modules marked `server-only`. The browser talks only to this app (`connect-src 'self'`).
+- API keys (Groq, OpenAQ, Upstash) are read only on the server, in modules marked `server-only`. The browser talks only to this app (`connect-src 'self'`); the only outside images are OpenStreetMap map tiles (`img-src`).
 - Every API request is checked for origin, rate-limited per client (shared through Upstash Redis in production), size-capped while it is read, and validated against a Zod schema. Errors leave the server as codes, never as free text.
 - Pages run under a Content-Security-Policy with a fresh nonce per request, so injected scripts don't run. Other headers: HSTS, `X-Frame-Options: DENY`, `nosniff`, a strict referrer policy, and a Permissions-Policy that allows only this site's own location request.
 - Text people type is fenced as data in prompts, and model replies are schema-checked before use. The model can cite only impact facts the server computed.

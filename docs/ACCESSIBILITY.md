@@ -12,12 +12,14 @@ Target: WCAG 2.2 AA. Checked by axe in component tests and in a real browser on 
 | Keyboard | Everything is reachable and operable, with visible `:focus-visible` rings and no traps | `src/app/styles/base.css` |
 | Colour | AQI bands are always named in text; the colour scale and the sky band's tint are decorative; AA contrast in light and dark, checked by axe on every sky colour the tests produce | `src/components/SkyReading.tsx`, `src/app/styles/sky.css`, `src/app/styles/tokens.css` |
 | Chart | A text summary as the chart's accessible name, a readout of the hovered hour, and the full values in a table | `src/components/OutlookChart.tsx` |
+| Map | A named region with a sentence saying what it shows; every station is also in a table with a row header, band named in text | `src/components/StationMap.tsx`, `src/components/StationsPanel.tsx` |
+| Slider | The time-outdoors slider has a label and `aria-valuetext` in words; the result is announced in a status region | `src/components/ChoicesPanel.tsx` |
 | Preferences | `prefers-color-scheme`, `prefers-reduced-motion`, `prefers-contrast: more`, `forced-colors` | `src/app/styles/preferences.css` |
 | Reflow and targets | No horizontal scroll at 320 px; buttons, chips and inputs at least 44 px | `src/app/styles/forms.css` |
-| Language | `lang="en-IN"` on `<html>` | `src/app/layout.tsx` |
+| Language | `lang="en-IN"` on `<html>`; the app's root carries the chosen language (`en` or `ta`), so screen readers switch voice, and each language button has its own `lang`; the switch is a labelled group of pressed-state buttons | `src/app/layout.tsx`, `src/components/AssistantApp.tsx`, `src/components/SiteFrame.tsx` |
 
 ## How it is tested
 
 - **Component tests:** axe on every panel in jsdom (`tests/ui`).
-- **Browser tests:** axe with every rule, including colour contrast, in light and dark with a plan showing and the table open; reflow at 320 px; skip link focus (`e2e/quality.spec.ts`).
+- **Browser tests:** axe with every rule, including colour contrast, in light and dark with a plan showing and the table open; reflow at 320 px; skip link focus (`e2e/quality.spec.ts`). The whole journey again in Tamil with axe (`e2e/tamil.spec.ts`).
 - **Lighthouse:** Accessibility 100 on mobile and desktop, on the live site (26 November 2026).
