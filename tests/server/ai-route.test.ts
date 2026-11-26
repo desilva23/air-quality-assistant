@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AiProviderError, AiUnavailableError } from "@/lib/ai/errors";
 import { aiRoute } from "@/lib/server/ai-route";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 import { rejection } from "../support/fetch";
 
-const Input = z.object({ question: z.string().min(1) });
+const Input = z.object({ question: z.string().check(z.minLength(1)) });
 const Output = z.object({ answer: z.string() });
 
 function post(body: string, headers: Record<string, string> = {}) {

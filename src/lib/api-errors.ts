@@ -2,7 +2,7 @@
 // a code, never free text, so nothing about the request or the model leaks, and
 // the browser words every message in the reader's language (src/lib/i18n).
 
-import { z } from "./zod";
+import * as z from "./zod";
 
 const API_ERROR_CODES = [
   // Sent by the server.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fetchJson, UpstreamError, urlWith } from "@/lib/air/fetch-json";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 import { json, rejection, stubFetch } from "../support/fetch";
 
 const schema = z.object({ ok: z.boolean() });

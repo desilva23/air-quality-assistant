@@ -151,6 +151,12 @@ h3[tabindex="-1"]:focus {
   cursor: pointer;
 }
 
+/* On an English page "தமிழ்" is drawn in the device's own Tamil font, so English
+   readers never download a Tamil webfont for one word. */
+.app:lang(en) .language-switch button:lang(ta) {
+  font-family: system-ui, sans-serif;
+}
+
 .language-switch button[aria-pressed="true"] {
   background: var(--metro);
   color: var(--metro-ink);

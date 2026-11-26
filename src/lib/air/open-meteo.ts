@@ -3,7 +3,7 @@ import "server-only";
 // with an hourly forecast and no key. It is the app's forecast and its stand-in
 // when no monitoring station is near or fresh.
 
-import { z } from "../zod";
+import * as z from "../zod";
 import type { OutlookHour, Place, Reading } from "../domain/air";
 import { isInIndia, type Coordinates } from "../domain/geo";
 import { fetchJson, UpstreamError, urlWith } from "./fetch-json";
@@ -14,8 +14,8 @@ const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 export const MODEL_SOURCE = "Open-Meteo (CAMS model)";
 
 /** Wall-clock time in IST, as Open-Meteo gives it when asked for Asia/Kolkata. */
-const LocalTime = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
-const Value = z.number().min(0).nullable();
+const LocalTime = z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/));
+const Value = z.nullable(z.number().check(z.gte(0)));
 
 const AirReplySchema = z.object({
   current: z.object({ time: LocalTime, pm2_5: Value, pm10: Value }),
@@ -23,17 +23,17 @@ const AirReplySchema = z.object({
 });
 
 const GeocodeReplySchema = z.object({
-  results: z
-    .array(
+  results: z.optional(
+    z.array(
       z.object({
         name: z.string(),
         latitude: z.number(),
         longitude: z.number(),
         country_code: z.string(),
-        admin1: z.string().optional(),
+        admin1: z.optional(z.string()),
       }),
-    )
-    .optional(),
+    ),
+  ),
 });
 
 const toIso = (local: string): string => `${local}:00+05:30`;

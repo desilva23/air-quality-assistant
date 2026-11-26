@@ -1,5 +1,5 @@
 import "server-only";
-import type { z } from "zod";
+import type * as z from "../zod";
 
 /** A data provider failed or replied with something unexpected. The message is safe to log. */
 export class UpstreamError extends Error {
@@ -15,7 +15,7 @@ interface FetchOptions {
 }
 
 /** GETs JSON from a data provider and validates it against `schema`. */
-export async function fetchJson<S extends z.ZodType>(
+export async function fetchJson<S extends z.ZodMiniType>(
   url: URL,
   schema: S,
   { source, headers }: FetchOptions,

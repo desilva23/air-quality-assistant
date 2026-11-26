@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AiResponseError, AiUnavailableError } from "@/lib/ai/errors";
 import { groqComplete } from "@/lib/ai/groq";
 import { generateStructured } from "@/lib/ai/llm";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 
 vi.mock("@/lib/ai/groq", () => ({ groqComplete: vi.fn() }));
 
 const request = {
   name: "answer",
-  schema: z.object({ answer: z.string().max(8) }),
+  schema: z.object({ answer: z.string().check(z.maxLength(8)) }),
   system: "rules",
   prompt: "question",
   model: "lite" as const,

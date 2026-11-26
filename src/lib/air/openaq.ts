@@ -3,7 +3,7 @@ import "server-only";
 // stations across India. The app uses the nearest station that has reported
 // PM2.5 recently.
 
-import { z } from "../zod";
+import * as z from "../zod";
 import {
   MAX_CONCENTRATION,
   STATION_MAX_AGE_HOURS,
@@ -22,10 +22,10 @@ const Timestamp = z.iso.datetime({ offset: true });
 
 const LocationSchema = z.object({
   id: z.int(),
-  name: z.string().nullish(),
-  provider: z.object({ name: z.string() }).nullish(),
+  name: z.nullish(z.string()),
+  provider: z.nullish(z.object({ name: z.string() })),
   coordinates: z.object({ latitude: z.number(), longitude: z.number() }),
-  datetimeLast: z.object({ utc: Timestamp }).nullish(),
+  datetimeLast: z.nullish(z.object({ utc: Timestamp })),
   sensors: z.array(
     z.object({ id: z.int(), parameter: z.object({ name: z.string(), units: z.string() }) }),
   ),

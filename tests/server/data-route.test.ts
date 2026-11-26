@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { dataRoute } from "@/lib/server/data-route";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 import { rejection } from "../support/fetch";
 
 const get = (query: string, headers: Record<string, string> = {}) =>
@@ -11,7 +11,7 @@ const get = (query: string, headers: Record<string, string> = {}) =>
 function route(run: (input: { q: string }) => Promise<{ items: string[] }>) {
   return dataRoute({
     name: "thing",
-    query: z.object({ q: z.string().min(2) }),
+    query: z.object({ q: z.string().check(z.minLength(2)) }),
     output: z.object({ items: z.array(z.string()) }),
     run,
     ttlMs: 60_000,

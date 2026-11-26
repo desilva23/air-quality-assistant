@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { createSavedStore, useHousehold, usePlace } from "@/lib/client/saved";
 import { DEFAULT_HOUSEHOLD } from "@/lib/domain/household";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 import { FAMILY, PLACE } from "../support/fixtures";
 
 describe("saved household and place", () => {

@@ -2,7 +2,7 @@
 // only cite these facts by id, so every number a user reads comes from here.
 // This file works out the numbers; impact-text.ts words them in each language.
 
-import { z } from "../zod";
+import * as z from "../zod";
 import type { Language } from "../i18n/language";
 import type { AirReport } from "./air";
 import { commuteKgPerDay, isPetrolVehicle, petrolRupees, weeklySavingKg } from "./emissions";
@@ -36,7 +36,10 @@ export const IMPACT_IDS = [
 
 export type ImpactId = (typeof IMPACT_IDS)[number];
 
-export const ImpactFactSchema = z.object({ id: z.enum(IMPACT_IDS), text: z.string().max(400) });
+export const ImpactFactSchema = z.object({
+  id: z.enum(IMPACT_IDS),
+  text: z.string().check(z.maxLength(400)),
+});
 
 export type ImpactFact = z.infer<typeof ImpactFactSchema>;
 

@@ -1,7 +1,7 @@
 // The app speaks English and Tamil. Everything a person reads, including the
 // AI's plan and the computed impacts, comes in the language they chose.
 
-import { z } from "../zod";
+import * as z from "../zod";
 
 export const LANGUAGES = ["en", "ta"] as const;
 

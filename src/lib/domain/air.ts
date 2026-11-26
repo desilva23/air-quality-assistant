@@ -2,15 +2,15 @@
 // from. Every reading carries its source and time, so the interface can say
 // where a number came from and how fresh it is.
 
-import { z } from "../zod";
+import * as z from "../zod";
 import { INDIA_BOUNDS } from "./geo";
 
 export const PlaceSchema = z.object({
-  name: z.string().trim().min(1).max(80),
+  name: z.string().check(z.trim(), z.minLength(1), z.maxLength(80)),
   /** State or district, when known. */
-  region: z.string().max(80).nullable(),
-  latitude: z.number().min(INDIA_BOUNDS.minLat).max(INDIA_BOUNDS.maxLat),
-  longitude: z.number().min(INDIA_BOUNDS.minLon).max(INDIA_BOUNDS.maxLon),
+  region: z.nullable(z.string().check(z.maxLength(80))),
+  latitude: z.number().check(z.gte(INDIA_BOUNDS.minLat), z.lte(INDIA_BOUNDS.maxLat)),
+  longitude: z.number().check(z.gte(INDIA_BOUNDS.minLon), z.lte(INDIA_BOUNDS.maxLon)),
 });
 
 /** How near and how recent a station reading must be to stand for a place. */
@@ -20,14 +20,15 @@ export const STATION_MAX_AGE_HOURS = 3;
 /** Above any PM level recorded in India; anything higher is a sensor fault. */
 export const MAX_CONCENTRATION = 2000;
 
-const Concentration = z.number().min(0).max(MAX_CONCENTRATION);
+const Concentration = z.number().check(z.gte(0), z.lte(MAX_CONCENTRATION));
+const Kilometres = z.number().check(z.gte(0), z.lte(100));
 const Timestamp = z.iso.datetime({ offset: true });
 
 const readingBase = {
   pm25: Concentration,
-  pm10: Concentration.nullable(),
+  pm10: z.nullable(Concentration),
   measuredAt: Timestamp,
-  source: z.string().max(80),
+  source: z.string().check(z.maxLength(80)),
 };
 
 /** A monitoring station's measurement, or a model's estimate for the spot. */
@@ -35,8 +36,8 @@ const ReadingSchema = z.discriminatedUnion("kind", [
   z.object({
     ...readingBase,
     kind: z.literal("station"),
-    station: z.string().max(120).nullable(),
-    distanceKm: z.number().min(0).max(100),
+    station: z.nullable(z.string().check(z.maxLength(120))),
+    distanceKm: Kilometres,
   }),
   z.object({ ...readingBase, kind: z.literal("model"), station: z.null(), distanceKm: z.null() }),
 ]);
@@ -50,18 +51,18 @@ export type AirNote = (typeof AIR_NOTES)[number];
 export const AirReportSchema = z.object({
   reading: ReadingSchema,
   /** Hourly PM2.5 forecast from the current hour, up to 48 hours. */
-  outlook: z.array(OutlookHourSchema).max(48),
-  outlookSource: z.string().max(80).nullable(),
+  outlook: z.array(OutlookHourSchema).check(z.maxLength(48)),
+  outlookSource: z.nullable(z.string().check(z.maxLength(80))),
   /** Why the model stood in for a station, when it did. A code; the browser words it. */
-  note: z.enum(AIR_NOTES).nullable(),
+  note: z.nullable(z.enum(AIR_NOTES)),
 });
 
 /** A monitoring station near the chosen place, with its latest PM2.5, for the map. */
 export const NearbyStationSchema = z.object({
-  name: z.string().max(120),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  distanceKm: z.number().min(0).max(100),
+  name: z.string().check(z.maxLength(120)),
+  latitude: z.number().check(z.gte(-90), z.lte(90)),
+  longitude: z.number().check(z.gte(-180), z.lte(180)),
+  distanceKm: Kilometres,
   pm25: Concentration,
   measuredAt: Timestamp,
 });

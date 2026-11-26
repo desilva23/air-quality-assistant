@@ -3,8 +3,7 @@
 // limits into plain-language hints. The limits still hold: replies are trimmed
 // to fit, then validated with Zod.
 
-import type { z as zod } from "zod";
-import { z } from "../zod";
+import * as z from "../zod";
 
 type JsonObject = Record<string, unknown>;
 
@@ -65,7 +64,7 @@ export interface ResponseSchemas {
   full: JsonObject;
 }
 
-export function responseSchemas(schema: zod.ZodType): ResponseSchemas {
+export function responseSchemas(schema: z.ZodMiniType): ResponseSchemas {
   const full: JsonObject = { ...z.toJSONSchema(schema) };
   return { portable: portableObject(full), full };
 }

@@ -1,5 +1,5 @@
 import "server-only";
-import type { z } from "zod";
+import type * as z from "../zod";
 import { groqKey } from "../server/config";
 import { AiResponseError, AiUnavailableError } from "./errors";
 import { groqComplete } from "./groq";
@@ -19,7 +19,7 @@ export interface Completion {
   signal: AbortSignal;
 }
 
-export interface StructuredRequest<S extends z.ZodType> {
+export interface StructuredRequest<S extends z.ZodMiniType> {
   name: string;
   schema: S;
   system: string;
@@ -34,7 +34,7 @@ export interface StructuredRequest<S extends z.ZodType> {
  * malformed reply gets one retry; provider failures and timeouts don't, so a
  * slow upstream can't stack up latency.
  */
-export async function generateStructured<S extends z.ZodType>(
+export async function generateStructured<S extends z.ZodMiniType>(
   request: StructuredRequest<S>,
 ): Promise<z.infer<S>> {
   const apiKey = groqKey();

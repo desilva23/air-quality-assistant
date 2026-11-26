@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import type { z } from "zod";
+import type * as z from "../zod";
 import { errorResponse } from "../api-errors";
 import { envelopeOf, type AiEnvelope, type FallbackNotice } from "../ai/contracts";
 import { AiProviderError, AiUnavailableError } from "../ai/errors";
@@ -14,16 +14,16 @@ const CACHE_MINUTES = 10;
 
 export interface AiRouteOptions<I, O> {
   name: string;
-  input: z.ZodType<I>;
+  input: z.ZodMiniType<I>;
   /** The reply's shape, used to check answers read back from the shared cache. */
-  output: z.ZodType<O>;
+  output: z.ZodMiniType<O>;
   run: (input: I) => Promise<O>;
   /** The deterministic answer when the model is unconfigured or fails. */
   fallback: (input: I) => O;
 }
 
 /** The body as validated input, or the refusal to send. */
-async function readInput<I>(request: Request, schema: z.ZodType<I>): Promise<I | Response> {
+async function readInput<I>(request: Request, schema: z.ZodMiniType<I>): Promise<I | Response> {
   const type = request.headers.get("content-type") ?? "";
   if (!type.startsWith("application/json"))
     return errorResponse("UNSUPPORTED_MEDIA_TYPE", NO_STORE);

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { fitToSchema, isObject, responseSchemas } from "@/lib/ai/json-schema";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 
 const schema = z.object({
-  title: z.string().max(10).describe("Short title"),
+  title: z.string().check(z.maxLength(10), z.describe("Short title")),
   format: z.string(),
-  note: z.string().max(5).nullable(),
-  tags: z.array(z.string().max(3)).min(1).max(2),
-  empty: z.array(z.string()).max(1),
+  note: z.nullable(z.string().check(z.maxLength(5))),
+  tags: z.array(z.string().check(z.maxLength(3))).check(z.minLength(1), z.maxLength(2)),
+  empty: z.array(z.string()).check(z.maxLength(1)),
 });
 
 describe("responseSchemas", () => {

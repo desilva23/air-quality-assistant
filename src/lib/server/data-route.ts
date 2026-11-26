@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import type { z } from "zod";
+import type * as z from "../zod";
 import { errorResponse } from "../api-errors";
 import { jsonResponse, NO_STORE, refusal } from "./request";
 import { createStores } from "./stores";
@@ -11,9 +11,9 @@ const DATA_REQUESTS_PER_MINUTE = 30;
 export interface DataRouteOptions<I, O> {
   name: string;
   /** Validates the query string, as an object of its parameters. */
-  query: z.ZodType<I>;
+  query: z.ZodMiniType<I>;
   /** The reply's shape, used to check answers read back from the shared cache. */
-  output: z.ZodType<O>;
+  output: z.ZodMiniType<O>;
   run: (input: I) => Promise<O>;
   /** How long an answer is reused for the same query. */
   ttlMs: number;

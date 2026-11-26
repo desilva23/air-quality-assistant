@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRateLimiter } from "@/lib/server/rate-limit";
 import { createStores } from "@/lib/server/stores";
 import { createTtlCache } from "@/lib/server/ttl-cache";
-import { z } from "@/lib/zod";
+import * as z from "@/lib/zod";
 import { bodyOf, json, rejection, stubFetch } from "../support/fetch";
 
 const options = {

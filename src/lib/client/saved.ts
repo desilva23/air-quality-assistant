@@ -3,7 +3,7 @@
 // version of the app, or one edited by hand, falls back to the default.
 
 import { useSyncExternalStore } from "react";
-import type { z } from "zod";
+import * as z from "../zod";
 import { PlaceSchema, type Place } from "../domain/air";
 import { DEFAULT_HOUSEHOLD, HouseholdSchema, type Household } from "../domain/household";
 import { LanguageSchema, type Language } from "../i18n/language";
@@ -15,7 +15,7 @@ interface SavedStore<T> {
   save: (value: T) => void;
 }
 
-function read<T>(key: string, schema: z.ZodType<T>, initial: T): T {
+function read<T>(key: string, schema: z.ZodMiniType<T>, initial: T): T {
   try {
     const raw = window.localStorage.getItem(key);
     if (raw === null) return initial;
@@ -27,7 +27,11 @@ function read<T>(key: string, schema: z.ZodType<T>, initial: T): T {
   }
 }
 
-export function createSavedStore<T>(key: string, schema: z.ZodType<T>, initial: T): SavedStore<T> {
+export function createSavedStore<T>(
+  key: string,
+  schema: z.ZodMiniType<T>,
+  initial: T,
+): SavedStore<T> {
   const listeners = new Set<() => void>();
   let current: { value: T } | null = null;
   return {
@@ -55,7 +59,7 @@ export function createSavedStore<T>(key: string, schema: z.ZodType<T>, initial: 
 }
 
 const household = createSavedStore("aqa:household:v1", HouseholdSchema, DEFAULT_HOUSEHOLD);
-const place = createSavedStore<Place | null>("aqa:place:v1", PlaceSchema.nullable(), null);
+const place = createSavedStore<Place | null>("aqa:place:v1", z.nullable(PlaceSchema), null);
 const language = createSavedStore<Language>("aqa:language:v1", LanguageSchema, "en");
 
 function useSaved<T>(store: SavedStore<T>): [T, (value: T) => void] {

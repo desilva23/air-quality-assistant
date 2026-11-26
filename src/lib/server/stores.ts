@@ -1,7 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
-import type { z as zod } from "zod";
-import { z } from "../zod";
+import * as z from "../zod";
 import { createRateLimiter, type RateLimitResult } from "./rate-limit";
 import { createTtlCache } from "./ttl-cache";
 
@@ -29,7 +28,7 @@ export interface StoreOptions<V> {
   /** In-memory cache size; Redis expires entries by time alone. */
   maxEntries: number;
   /** Checks values read back from Redis, which is outside this process. */
-  schema: zod.ZodType<V>;
+  schema: z.ZodMiniType<V>;
 }
 
 type Env = Record<string, string | undefined>;
@@ -39,7 +38,7 @@ type RunCommands = (commands: Command[]) => Promise<unknown[]>;
 const REDIS_TIMEOUT_MS = 1500;
 
 const PipelineReplySchema = z.array(
-  z.object({ result: z.unknown().optional(), error: z.string().optional() }),
+  z.object({ result: z.optional(z.unknown()), error: z.optional(z.string()) }),
 );
 
 /** Sends Redis commands to Upstash's REST API in one round trip. */

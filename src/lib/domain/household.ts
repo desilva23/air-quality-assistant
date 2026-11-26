@@ -2,7 +2,7 @@
 // it is built from this: a commuter and a family with toddlers in the same city
 // get different plans.
 
-import { z } from "../zod";
+import * as z from "../zod";
 
 export const PARTS_OF_DAY = ["morning", "afternoon", "evening"] as const;
 export const COMMUTE_MODES = [
@@ -38,13 +38,13 @@ export const HouseholdSchema = z.object({
   commute: z.object({
     mode: z.enum(COMMUTE_MODES),
     /** One way. */
-    distanceKm: z.number().min(0).max(MAX_COMMUTE_KM),
-    daysPerWeek: z.int().min(0).max(7),
+    distanceKm: z.number().check(z.gte(0), z.lte(MAX_COMMUTE_KM)),
+    daysPerWeek: z.int().check(z.gte(0), z.lte(7)),
   }),
   activity: z.object({
     kind: z.enum(ACTIVITIES),
     partOfDay: z.enum(PARTS_OF_DAY),
-    minutes: z.int().min(0).max(MAX_ACTIVITY_MINUTES),
+    minutes: z.int().check(z.gte(0), z.lte(MAX_ACTIVITY_MINUTES)),
   }),
   home: z.object({
     purifier: z.boolean(),

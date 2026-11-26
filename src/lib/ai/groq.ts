@@ -1,5 +1,5 @@
 import "server-only";
-import { z } from "../zod";
+import * as z from "../zod";
 import { AiProviderError, AiResponseError } from "./errors";
 import type { Completion, ModelTier } from "./llm";
 
@@ -8,14 +8,14 @@ const MAX_COMPLETION_TOKENS = 4096;
 
 /** The parts of a Groq reply this client reads. */
 const ReplySchema = z.object({
-  choices: z
-    .array(
+  choices: z.optional(
+    z.array(
       z.object({
-        message: z.object({ content: z.string().nullish() }),
-        finish_reason: z.string().nullish(),
+        message: z.object({ content: z.nullish(z.string()) }),
+        finish_reason: z.nullish(z.string()),
       }),
-    )
-    .optional(),
+    ),
+  ),
 });
 
 const ErrorBodySchema = z.object({ error: z.object({ message: z.string() }) });

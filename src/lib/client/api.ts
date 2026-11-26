@@ -5,7 +5,7 @@
 // the endpoint's schema is rejected here as well as checked on the server.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { z } from "zod";
+import type * as z from "../zod";
 import { AirReportSchema, type AirReport } from "../domain/air";
 import { roundCoordinate, type Coordinates } from "../domain/geo";
 import {
@@ -55,7 +55,7 @@ function failureCode(error: unknown, signal: AbortSignal | undefined): ApiErrorC
   return "NETWORK";
 }
 
-interface Call<S extends z.ZodType> {
+interface Call<S extends z.ZodMiniType> {
   path: string;
   schema: S;
   timeoutMs: number;
@@ -63,7 +63,7 @@ interface Call<S extends z.ZodType> {
   body?: unknown;
 }
 
-async function request<S extends z.ZodType>(
+async function request<S extends z.ZodMiniType>(
   { path, schema, timeoutMs, body }: Call<S>,
   { signal, fetcher = fetch }: RequestOptions = {},
 ): Promise<z.infer<S>> {
