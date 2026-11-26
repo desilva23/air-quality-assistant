@@ -1,7 +1,6 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import type { Map as LeafletMap } from "leaflet";
 import { useEffect, useRef } from "react";
 import type { NearbyStation } from "@/lib/domain/air";
 import { categoryForPm25, type AqiCategory } from "@/lib/domain/aqi";
@@ -37,12 +36,13 @@ export function StationMap({ centre, stations, label }: StationMapProps) {
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let map: LeafletMap | null = null;
+    let removeMap: (() => void) | null = null;
     let cancelled = false;
     void import("leaflet").then((leaflet) => {
       const element = box.current;
       if (cancelled || !element) return;
-      map = leaflet.map(element, { scrollWheelZoom: false });
+      const map = leaflet.map(element, { scrollWheelZoom: false });
+      removeMap = () => map.remove();
       leaflet.tileLayer(TILES, { attribution: ATTRIBUTION, maxZoom: 18 }).addTo(map);
       const points: [number, number][] = [[centre.latitude, centre.longitude]];
       for (const station of stations) {
@@ -71,7 +71,7 @@ export function StationMap({ centre, stations, label }: StationMapProps) {
     });
     return () => {
       cancelled = true;
-      map?.remove();
+      removeMap?.();
     };
   }, [centre.latitude, centre.longitude, stations]);
 
