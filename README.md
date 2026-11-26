@@ -169,7 +169,8 @@ Every phrase of the brief maps to a feature in [What it does](#what-it-does). Li
 - **Shared cache:** air and place lookups are cached in Redis by rounded coordinates (10 minutes) and query (24 hours), so a busy city costs one upstream call per period. Identical AI requests are cached for 10 minutes. Hits are marked `X-Cache: HIT`.
 - **Upstream calls:** the station and model sources are asked in parallel, with 6-second timeouts.
 - **AI calls:** only on explicit actions, with a lite model for questions.
-- **Browser:** derived values are memoised, number inputs commit on blur, and the plan and question panels load lazily.
+- **Browser:** derived values are memoised, number inputs commit on blur, and the plan and question panels load lazily. Two self-hosted font files keep the first paint light.
+- **Lighthouse on the live site (26 Nov 2026):** desktop 100 for performance, accessibility, best practices and SEO; mobile 93–96 for performance (two runs on simulated slow 4G) and 100 for the other three.
 
 ### Testing
 
@@ -187,6 +188,7 @@ Details are in [docs/TESTING.md](docs/TESTING.md).
 - **Colour and charts:** AQI bands are always named in text, and the sky band's colour is decorative. The chart has a text summary and a table view.
 - **Contrast and preferences:** AA contrast in light and dark, plus `prefers-reduced-motion`, `prefers-contrast: more` and `forced-colors` support.
 - **Layout:** 44 px targets, and no sideways scroll at 320 px.
+- **Lighthouse accessibility:** 100 on mobile and desktop (live site, 26 Nov 2026).
 
 Details are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 

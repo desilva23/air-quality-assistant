@@ -20,3 +20,4 @@ Target: WCAG 2.2 AA. Checked by axe in component tests and in a real browser on 
 
 - **Component tests:** axe on every panel in jsdom (`tests/ui`).
 - **Browser tests:** axe with every rule, including colour contrast, in light and dark with a plan showing and the table open; reflow at 320 px; skip link focus (`e2e/quality.spec.ts`).
+- **Lighthouse:** Accessibility 100 on mobile and desktop, on the live site (26 November 2026).
