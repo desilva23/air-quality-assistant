@@ -5,6 +5,9 @@ import { errorResponse } from "../api-errors";
 import { jsonResponse, NO_STORE, refusal } from "./request";
 import { createStores } from "./stores";
 
+/** Lookups are cheap but hit outside services, so each client gets thirty a minute per route. */
+const DATA_REQUESTS_PER_MINUTE = 30;
+
 export interface DataRouteOptions<I, O> {
   name: string;
   /** Validates the query string, as an object of its parameters. */
@@ -24,7 +27,7 @@ export interface DataRouteOptions<I, O> {
 export function dataRoute<I, O>({ name, query, output, run, ttlMs }: DataRouteOptions<I, O>) {
   const { limiter, cache } = createStores<O>({
     name,
-    limit: 30,
+    limit: DATA_REQUESTS_PER_MINUTE,
     windowMs: 60_000,
     ttlMs,
     maxEntries: 500,

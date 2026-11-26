@@ -9,10 +9,10 @@ The live app is at https://air-quality-assistant-three.vercel.app. Every push to
 | `GROQ_API_KEY` | For AI features | Read only on the server. Without it, plans and answers come from the built-in templates. |
 | `OPENAQ_API_KEY` | For station readings | Read only on the server. Without it, current readings come from the CAMS model. |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Recommended | Set by Vercel's **Upstash for Redis** integration. These share the rate limit and the caches across instances. |
-| `GROQ_MODEL`, `GROQ_LITE_MODEL` | Optional | Override the default models (`openai/gpt-oss-120b` and `openai/gpt-oss-20b`). |
-| `TRUSTED_PROXY_HOPS` | Optional | Defaults to 1, which is correct on Vercel. |
+| `GROQ_MODEL`, `GROQ_LITE_MODEL` | Leave unset | Override the default models (`openai/gpt-oss-120b` and `openai/gpt-oss-20b`). A placeholder value here makes every AI call fail over to the built-in guidance. |
+| `TRUSTED_PROXY_HOPS` | Leave unset | Defaults to 1, which is correct on Vercel. A larger value lets a client choose its own rate-limit key. |
 
-Set them in Vercel → Project → Settings → Environment Variables. Never commit them; `.env.example` lists them without values.
+Set them in Vercel → Project → Settings → Environment Variables. Don't import `.env.example` wholesale: its optional lines are commented out because blank or placeholder values break the model choice and Redis. Never commit real values.
 
 ## Region and runtime
 

@@ -3,7 +3,7 @@
 import { memo, useMemo, useState } from "react";
 import type { OutlookHour } from "@/lib/domain/air";
 import { CATEGORY_LABEL, categoryForPm25 } from "@/lib/domain/aqi";
-import { formatClock } from "@/lib/domain/time";
+import { formatClock, formatHour } from "@/lib/domain/time";
 import { cleanestWindow } from "@/lib/domain/timing";
 import { outlookScale, PM25_DAILY_LIMIT } from "./outlook-scale";
 
@@ -14,6 +14,14 @@ export interface OutlookChartProps {
 
 const describe = (hour: OutlookHour): string =>
   `${formatClock(hour.time)}, ${String(Math.round(hour.pm25))} µg/m³ (${CATEGORY_LABEL[categoryForPm25(hour.pm25)]})`;
+
+/** One sentence a screen reader reads in place of the chart. */
+function summarise(day: OutlookHour[], bestHour: OutlookHour | undefined): string {
+  const values = day.map((hour) => Math.round(hour.pm25));
+  const range = `ranges from ${String(Math.min(...values))} to ${String(Math.max(...values))} µg/m³`;
+  const best = bestHour ? ` Cleanest waking hour: ${describe(bestHour)}.` : "";
+  return `Forecast PM2.5 for the next ${String(day.length)} hours ${range}.${best}`;
+}
 
 /** The next 24 hours of forecast PM2.5, with the cleanest waking hour picked out. */
 export const OutlookChart = memo(function OutlookChart({ outlook, source }: OutlookChartProps) {
@@ -26,7 +34,7 @@ export const OutlookChart = memo(function OutlookChart({ outlook, source }: Outl
     return <p className="note">No hourly forecast is available for this place right now.</p>;
   }
   const bestHour = day.find((hour) => hour.time === best?.start);
-  const summary = `Forecast PM2.5 for the next ${String(day.length)} hours ranges from ${String(Math.round(Math.min(...day.map((h) => h.pm25))))} to ${String(Math.round(Math.max(...day.map((h) => h.pm25))))} µg/m³.${bestHour ? ` Cleanest waking hour: ${describe(bestHour)}.` : ""}`;
+  const summary = summarise(day, bestHour);
 
   return (
     <figure className="outlook">
@@ -63,9 +71,7 @@ export const OutlookChart = memo(function OutlookChart({ outlook, source }: Outl
       </div>
       <ol className="outlook-axis" aria-hidden="true">
         {day.map((hour, index) => (
-          <li key={hour.time}>
-            {index % 4 === 0 ? formatClock(hour.time).replace(":00", "") : ""}
-          </li>
+          <li key={hour.time}>{index % 4 === 0 ? formatHour(hour.time) : ""}</li>
         ))}
       </ol>
       <details className="outlook-table">

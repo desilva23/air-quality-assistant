@@ -1,14 +1,15 @@
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import type { AirReport, Reading } from "@/lib/domain/air";
-import { CATEGORY_HEALTH, indianAqi } from "@/lib/domain/aqi";
+import { CATEGORY_HEALTH, type AqiResult } from "@/lib/domain/aqi";
 import { cigarettesPerDay, WHO_PM25_DAILY, whoMultiple } from "@/lib/domain/exposure";
 import { formatClock } from "@/lib/domain/time";
 import { OutlookChart } from "./OutlookChart";
 
 export interface AirNowProps {
   report: AirReport;
+  aqi: AqiResult;
 }
 
 function SourceDetails({ reading }: { reading: Reading }) {
@@ -47,9 +48,8 @@ function SourceDetails({ reading }: { reading: Reading }) {
 }
 
 /** What today's air means for health, exactly where the numbers came from, and the day ahead. */
-export const AirNow = memo(function AirNow({ report }: AirNowProps) {
+export const AirNow = memo(function AirNow({ report, aqi }: AirNowProps) {
   const { reading } = report;
-  const aqi = useMemo(() => indianAqi(reading), [reading]);
   const cigarettes = cigarettesPerDay(reading.pm25);
   const who = whoMultiple(reading.pm25);
 

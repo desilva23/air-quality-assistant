@@ -141,7 +141,7 @@
 
 .where h2 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .sky-reading {
@@ -175,8 +175,8 @@
 }
 
 .aqi-label {
-  font-family: var(--font-heading);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-weight: 700;
   font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
@@ -222,7 +222,7 @@
 }
 
 .sky-source {
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 0.25rem;
 }
 

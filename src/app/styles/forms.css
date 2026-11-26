@@ -13,7 +13,7 @@
 }
 
 label {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .unit {
@@ -126,8 +126,8 @@ legend {
 }
 
 .sample strong {
-  font-family: var(--font-heading);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-weight: 700;
   font-size: 1.1rem;
 }
 

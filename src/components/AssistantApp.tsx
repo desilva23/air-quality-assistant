@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { Place } from "@/lib/domain/air";
 import type { PlanRequest } from "@/lib/ai/contracts";
 import { fetchAir, useApiCall } from "@/lib/client/api";
@@ -9,15 +9,13 @@ import { useHousehold, usePlace } from "@/lib/client/saved";
 import { indianAqi } from "@/lib/domain/aqi";
 import type { Sample } from "@/lib/samples";
 import { AirSection } from "./AirSection";
+import { AskSection } from "./AskSection";
 import { HouseholdForm } from "./HouseholdForm";
 import { PlaceSearch } from "./PlaceSearch";
 import { PlanSection } from "./PlanSection";
 import { SampleProfiles } from "./SampleProfiles";
 import { Intro, SiteFooter, SiteHeader, SkyBand } from "./SiteFrame";
 import { SkyReading } from "./SkyReading";
-
-// Shown only once live air has loaded, so its code loads then too.
-const AskPanel = lazy(() => import("./AskPanel").then((m) => ({ default: m.AskPanel })));
 
 export interface AssistantAppProps {
   aiEnabled: boolean;
@@ -87,6 +85,7 @@ export function AssistantApp({ aiEnabled }: AssistantAppProps) {
                 place={place}
                 status={air.status}
                 report={report}
+                aqi={aqi}
                 error={air.error}
                 onRetry={() => void loadAir(place)}
               />
@@ -96,14 +95,7 @@ export function AssistantApp({ aiEnabled }: AssistantAppProps) {
               <HouseholdForm value={household} onChange={setHousehold} />
             </section>
             <PlanSection request={request} />
-            {request && (
-              <section aria-labelledby="ask-heading" className="card span-all">
-                <h2 id="ask-heading">Ask about today</h2>
-                <Suspense fallback={<p>Loading…</p>}>
-                  <AskPanel context={request} />
-                </Suspense>
-              </section>
-            )}
+            {request && <AskSection context={request} />}
           </div>
         </main>
       </SkyBand>

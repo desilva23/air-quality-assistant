@@ -2,14 +2,19 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { AirNow } from "@/components/AirNow";
+import { indianAqi } from "@/lib/domain/aqi";
+import type { AirReport } from "@/lib/domain/air";
 import { OutlookChart } from "@/components/OutlookChart";
 import { outlookScale } from "@/components/outlook-scale";
 import { axeViolations } from "../support/axe";
 import { MODEL_READING, outlookFrom, report } from "../support/fixtures";
 
+/** AirNow with the index its parent would compute. */
+const airNow = (data: AirReport) => <AirNow report={data} aqi={indianAqi(data.reading)} />;
+
 describe("AirNow", () => {
   it("shows the index, its meaning, and exactly where and when it was measured", async () => {
-    const { container } = render(<AirNow report={report()} />);
+    const { container } = render(airNow(report()));
     expect(screen.getByText("Respiratory illness on prolonged exposure.")).toBeInTheDocument();
     expect(screen.getByText("OpenAQ (CPCB)")).toBeInTheDocument();
     expect(screen.getByText("ITO, Delhi, 3.2 km away")).toBeInTheDocument();
@@ -25,27 +30,22 @@ describe("AirNow", () => {
 
   it("labels a model estimate, explains why, and copes without PM10 or a station name", () => {
     const model = render(
-      <AirNow
-        report={report({
-          reading: { ...MODEL_READING, pm25: 30, pm10: 300 },
-          note: "No station nearby.",
-        })}
-      />,
+      airNow(
+        report({ reading: { ...MODEL_READING, pm25: 30, pm10: 300 }, note: "No station nearby." }),
+      ),
     );
     expect(screen.getByText("Model estimate for this spot")).toBeInTheDocument();
     expect(screen.getByText(/WHO 24-hour guideline/)).toHaveTextContent("PM2.5 is 2×");
     expect(screen.getByText("For")).toBeInTheDocument();
     expect(screen.getByText("No station nearby.")).toBeInTheDocument();
     model.unmount();
-    const noPm10 = render(
-      <AirNow report={report({ reading: { ...MODEL_READING, pm25: 12, pm10: null } })} />,
-    );
+    const noPm10 = render(airNow(report({ reading: { ...MODEL_READING, pm25: 12, pm10: null } })));
     expect(screen.queryByText("PM10")).not.toBeInTheDocument();
     expect(
       screen.getByText("PM2.5 is within the WHO 24-hour guideline (15 µg/m³)."),
     ).toBeInTheDocument();
     noPm10.unmount();
-    render(<AirNow report={report({ reading: { ...report().reading, station: null } })} />);
+    render(airNow(report({ reading: { ...report().reading, station: null } })));
     expect(screen.getByText("Monitoring station, 3.2 km away")).toBeInTheDocument();
   });
 });

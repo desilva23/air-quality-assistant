@@ -78,10 +78,11 @@ export const PlanReplySchema = z
 
 export type PlanReply = z.infer<typeof PlanReplySchema>;
 
+export const MIN_QUESTION_LENGTH = 3;
 export const MAX_QUESTION_LENGTH = 300;
 
 export const AskRequestSchema = PlanRequestSchema.extend({
-  question: z.string().trim().min(3).max(MAX_QUESTION_LENGTH),
+  question: z.string().trim().min(MIN_QUESTION_LENGTH).max(MAX_QUESTION_LENGTH),
 });
 
 export type AskRequest = z.infer<typeof AskRequestSchema>;

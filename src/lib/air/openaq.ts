@@ -4,7 +4,7 @@ import "server-only";
 // PM2.5 recently.
 
 import { z } from "../zod";
-import type { Reading } from "../domain/air";
+import { MAX_CONCENTRATION, type Reading } from "../domain/air";
 import { distanceKm, type Coordinates } from "../domain/geo";
 import { fetchJson, urlWith } from "./fetch-json";
 
@@ -42,7 +42,7 @@ const isFresh = (utc: string, now: number): boolean =>
   now - Date.parse(utc) <= MAX_AGE_HOURS * 3_600_000;
 
 /** Plausible concentrations only; networks sometimes report placeholders like -999. */
-const plausible = (value: number): boolean => value >= 0 && value <= 2000;
+const plausible = (value: number): boolean => value >= 0 && value <= MAX_CONCENTRATION;
 
 function nearestFresh(locations: Location[], point: Coordinates, now: number) {
   return locations

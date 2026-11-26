@@ -1,8 +1,8 @@
 /* What today's air means, its sources, and the hourly forecast chart. */
 
 .health {
-  font-family: var(--font-heading);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-weight: 700;
   font-size: 1.25rem;
   line-height: 1.3;
   margin-bottom: 0.35rem;
@@ -157,7 +157,7 @@
   display: flex;
   align-items: center;
   color: var(--metro);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 table {

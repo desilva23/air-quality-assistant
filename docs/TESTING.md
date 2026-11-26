@@ -15,7 +15,7 @@ Last local run: 26 November 2026.
 
 | Suite | Folder | Tests | Result |
 | --- | --- | --- | --- |
-| Domain rules | `tests/domain` | 65 | Passed |
+| Domain rules | `tests/domain` | 66 | Passed |
 | Air data clients and report | `tests/air` | 22 | Passed |
 | AI contracts, prompts, client and fallbacks | `tests/ai` | 34 | Passed |
 | Route factories, guards, stores, CSP | `tests/server` | 31 | Passed |
@@ -23,7 +23,7 @@ Last local run: 26 November 2026.
 | Browser client, saved settings, location | `tests/client` | 14 | Passed |
 | UI flows with axe | `tests/ui` | 29 | Passed |
 | Project hygiene | `tests/quality` | 8 | Passed |
-| **Unit and integration total** | | **210** | **All passed** |
+| **Unit and integration total** | | **211** | **All passed** |
 | End to end in real Chromium | `e2e/` | 12 | All passed |
 
 | Coverage (`src/`) | Result | Enforced in CI |

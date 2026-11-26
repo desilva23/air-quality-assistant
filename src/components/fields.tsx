@@ -49,7 +49,7 @@ export function NumberField({
       <input
         id={id}
         type="number"
-        inputMode="decimal"
+        inputMode={Number.isInteger(step) ? "numeric" : "decimal"}
         min={min}
         max={max}
         step={step}

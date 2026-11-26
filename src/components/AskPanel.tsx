@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type SubmitEvent } from "react";
-import { MAX_QUESTION_LENGTH, type PlanRequest } from "@/lib/ai/contracts";
+import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH, type PlanRequest } from "@/lib/ai/contracts";
 import { askQuestion, useApiCall } from "@/lib/client/api";
 import { SourceNote } from "./SourceNote";
 
@@ -25,7 +25,7 @@ export function AskPanel({ context }: AskPanelProps) {
   function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = question.trim();
-    if (text.length >= 3) void ask.run({ ...context, question: text });
+    if (text.length >= MIN_QUESTION_LENGTH) void ask.run({ ...context, question: text });
   }
 
   return (
@@ -37,7 +37,7 @@ export function AskPanel({ context }: AskPanelProps) {
             id={id}
             rows={2}
             value={question}
-            minLength={3}
+            minLength={MIN_QUESTION_LENGTH}
             maxLength={MAX_QUESTION_LENGTH}
             onChange={(event) => setQuestion(event.target.value)}
           />

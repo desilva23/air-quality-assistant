@@ -40,3 +40,11 @@ describe("IST time", () => {
     expect(formatClock("2026-11-25T18:30:00Z")).toBe("12:00 am");
   });
 });
+
+describe("hour labels", () => {
+  it("formats an hour for a chart axis in IST", async () => {
+    const { formatHour } = await import("@/lib/domain/time");
+    expect(formatHour("2026-11-26T14:00:00+05:30")).toBe("2 pm");
+    expect(formatHour("2026-11-25T18:30:00Z")).toBe("12 am");
+  });
+});

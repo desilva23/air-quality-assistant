@@ -5,7 +5,12 @@ import { z } from "../zod";
 import { PlaceSchema } from "../domain/air";
 import { INDIA_BOUNDS, roundCoordinate } from "../domain/geo";
 
-export const PlacesQuerySchema = z.object({ q: z.string().trim().min(2).max(60) });
+export const MIN_QUERY_LENGTH = 2;
+export const MAX_QUERY_LENGTH = 60;
+
+export const PlacesQuerySchema = z.object({
+  q: z.string().trim().min(MIN_QUERY_LENGTH).max(MAX_QUERY_LENGTH),
+});
 
 export type PlacesQuery = z.infer<typeof PlacesQuerySchema>;
 

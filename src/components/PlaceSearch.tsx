@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type SubmitEvent } from "react";
+import { MAX_QUERY_LENGTH, MIN_QUERY_LENGTH } from "@/lib/air/contracts";
 import { searchPlaces, useApiCall } from "@/lib/client/api";
 import { useDeviceLocation } from "@/lib/client/geolocation";
 import type { Place } from "@/lib/domain/air";
@@ -23,7 +24,8 @@ export function PlaceSearch({ onSelect }: PlaceSearchProps) {
   function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     device.clearMessage();
-    if (query.trim().length >= 2) void search.run({ q: query.trim() });
+    const q = query.trim();
+    if (q.length >= MIN_QUERY_LENGTH) void search.run({ q });
   }
 
   function choose(place: Place) {
@@ -46,8 +48,8 @@ export function PlaceSearch({ onSelect }: PlaceSearchProps) {
             id={inputId}
             type="search"
             value={query}
-            minLength={2}
-            maxLength={60}
+            minLength={MIN_QUERY_LENGTH}
+            maxLength={MAX_QUERY_LENGTH}
             autoComplete="address-level2"
             placeholder="e.g. Noida, Lucknow, Pune"
             onChange={(event) => setQuery(event.target.value)}

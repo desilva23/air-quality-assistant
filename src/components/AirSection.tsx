@@ -1,18 +1,21 @@
 "use client";
 
+import type { CallStatus } from "@/lib/client/api";
 import type { AirReport, Place } from "@/lib/domain/air";
+import type { AqiResult } from "@/lib/domain/aqi";
 import { AirNow } from "./AirNow";
 
 export interface AirSectionProps {
   place: Place;
-  status: "idle" | "loading" | "done" | "error";
+  status: CallStatus;
   report: AirReport | undefined;
+  aqi: AqiResult | null;
   error: string | undefined;
   onRetry: () => void;
 }
 
 /** Live air for the chosen place, with loading and failure states. */
-export function AirSection({ place, status, report, error, onRetry }: AirSectionProps) {
+export function AirSection({ place, status, report, aqi, error, onRetry }: AirSectionProps) {
   return (
     <section
       aria-labelledby="air-heading"
@@ -29,7 +32,7 @@ export function AirSection({ place, status, report, error, onRetry }: AirSection
           </button>
         </div>
       )}
-      {status === "done" && report && <AirNow report={report} />}
+      {report && aqi && <AirNow report={report} aqi={aqi} />}
     </section>
   );
 }

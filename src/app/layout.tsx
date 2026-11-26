@@ -5,8 +5,9 @@ import "./globals.css";
 
 // Both from Ek Type, a Mumbai foundry; both cover Devanagari. Next serves the
 // files from this site, so the Content-Security-Policy stays 'self'.
-const display = Baloo_2({ subsets: ["latin"], weight: ["600", "800"], variable: "--font-display" });
-const body = Mukta({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-body" });
+// Two weights in all: Baloo 2 for big type only, Mukta for everything else.
+const display = Baloo_2({ subsets: ["latin"], weight: ["800"], variable: "--font-display" });
+const body = Mukta({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "Urban Air Quality Assistant",

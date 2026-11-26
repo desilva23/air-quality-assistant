@@ -13,7 +13,10 @@ export const PlaceSchema = z.object({
   longitude: z.number().min(INDIA_BOUNDS.minLon).max(INDIA_BOUNDS.maxLon),
 });
 
-const Concentration = z.number().min(0).max(2000);
+/** Above any PM level recorded in India; anything higher is a sensor fault. */
+export const MAX_CONCENTRATION = 2000;
+
+const Concentration = z.number().min(0).max(MAX_CONCENTRATION);
 const Timestamp = z.iso.datetime({ offset: true });
 
 const ReadingSchema = z.object({

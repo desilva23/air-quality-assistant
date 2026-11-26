@@ -121,8 +121,10 @@ export function askQuestion(
 
 // --- Calling an endpoint from a component -----------------------------------
 
+export type CallStatus = "idle" | "loading" | "done" | "error";
+
 interface CallState<O> {
-  status: "idle" | "loading" | "done" | "error";
+  status: CallStatus;
   data?: O;
   error?: string;
 }

@@ -38,8 +38,9 @@ h2 {
 }
 
 h3 {
+  font-family: var(--font-text);
   font-size: 1.35rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 h4 {
@@ -106,8 +107,8 @@ h3[tabindex="-1"]:focus {
   align-items: center;
   gap: 0.6rem;
   margin: 0;
-  font-family: var(--font-heading);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-weight: 700;
   font-size: 1.1rem;
 }
 
@@ -124,7 +125,7 @@ h3[tabindex="-1"]:focus {
 .ai-status {
   margin: 0;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.3rem 0.85rem;
   border-radius: 999px;
   background: var(--frost);

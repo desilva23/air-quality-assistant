@@ -8,6 +8,9 @@ import { jsonResponse, NO_STORE, readLimitedBody, refusal } from "./request";
 import { createStores } from "./stores";
 
 const MAX_BODY_BYTES = 32_000;
+/** Model calls spend quota, so each client gets ten a minute on each AI route. */
+const AI_REQUESTS_PER_MINUTE = 10;
+const CACHE_MINUTES = 10;
 
 export interface AiRouteOptions<I, O> {
   name: string;
@@ -61,9 +64,9 @@ function fallbackNotice(error: unknown): string {
 export function aiRoute<I, O>({ name, input, output, run, fallback }: AiRouteOptions<I, O>) {
   const { limiter, cache } = createStores<AiEnvelope<O>>({
     name: `ai-${name}`,
-    limit: 10,
+    limit: AI_REQUESTS_PER_MINUTE,
     windowMs: 60_000,
-    ttlMs: 10 * 60_000,
+    ttlMs: CACHE_MINUTES * 60_000,
     maxEntries: 200,
     schema: envelopeOf(output),
   });
