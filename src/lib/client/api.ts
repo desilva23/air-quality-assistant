@@ -18,7 +18,7 @@ import {
   type PlanReply,
   type PlanRequest,
 } from "../ai/contracts";
-import { API_ERROR_MESSAGES, ApiErrorBodySchema, type ApiErrorCode } from "../api-errors";
+import { ApiErrorBodySchema, type ApiErrorCode } from "../api-errors";
 
 /** Data lookups answer within seconds; AI calls get a little longer than the server's model timeout. */
 const DATA_TIMEOUT_MS = 15_000;
@@ -28,7 +28,8 @@ export class ApiError extends Error {
   readonly code: ApiErrorCode;
 
   constructor(code: ApiErrorCode) {
-    super(API_ERROR_MESSAGES[code]);
+    // The code is the message; the interface words it in the reader's language.
+    super(code);
     this.name = "ApiError";
     this.code = code;
   }
@@ -126,7 +127,7 @@ export type CallStatus = "idle" | "loading" | "done" | "error";
 interface CallState<O> {
   status: CallStatus;
   data?: O;
-  error?: string;
+  error?: ApiErrorCode;
 }
 
 /**
@@ -159,8 +160,7 @@ export function useApiCall<I, O>(call: (input: I, options: RequestOptions) => Pr
       } catch (error) {
         const code = error instanceof ApiError ? error.code : "INTERNAL";
         if (code !== "CANCELLED") {
-          const message = API_ERROR_MESSAGES[code];
-          setState((previous) => ({ status: "error", error: message, data: previous.data }));
+          setState((previous) => ({ status: "error", error: code, data: previous.data }));
         }
         return null;
       }

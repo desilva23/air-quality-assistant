@@ -45,6 +45,27 @@ describe("PlaceSearch", () => {
     expect(await screen.findByText(/Live air data couldn't be fetched/)).toBeInTheDocument();
   });
 
+  it("uses the device's location, named in the reader's language", async () => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: (
+          found: (p: { coords: { latitude: number; longitude: number } }) => void,
+        ) => found({ coords: { latitude: 13.0827, longitude: 80.2707 } }),
+      },
+    });
+    const onSelect = vi.fn();
+    render(<PlaceSearch onSelect={onSelect} />);
+    await userEvent.setup().click(screen.getByRole("button", { name: "Use my location" }));
+    expect(onSelect).toHaveBeenCalledWith({
+      name: "Your location",
+      region: null,
+      latitude: 13.08,
+      longitude: 80.27,
+    });
+    Reflect.deleteProperty(navigator, "geolocation");
+  });
+
   it("shows progress while locating and explains a refusal", async () => {
     let refuse: () => void = () => undefined;
     Object.defineProperty(navigator, "geolocation", {
@@ -65,7 +86,7 @@ describe("PlanPanel", () => {
   const envelope = {
     source: "fallback" as const,
     data: planFallback(planRequest()),
-    notice: "Built-in guidance.",
+    notice: "ai-failed" as const,
   };
   const parts = partForecasts(planRequest().report.outlook);
 

@@ -2,21 +2,17 @@
 // numbers the app has already worked out, so it writes personal advice
 // without ever producing a figure of its own.
 
-import { CATEGORY_HEALTH, CATEGORY_LABEL } from "../domain/aqi";
-import {
-  ACTIVITY_LABEL,
-  COOKING_LABEL,
-  MASK_LABEL,
-  MODE_LABEL,
-  PART_LABEL,
-  PARTS_OF_DAY,
-  type Household,
-} from "../domain/household";
+import { PARTS_OF_DAY, type Household, type SensitiveGroup } from "../domain/household";
 import type { Reading } from "../domain/air";
 import type { Situation } from "../domain/situation";
 import { formatClock } from "../domain/time";
 import { WHO_PM25_DAILY, whoMultiple } from "../domain/exposure";
+import { LABELS } from "../i18n/labels";
+import type { Language } from "../i18n/language";
 import type { AskRequest, PlanRequest } from "./contracts";
+
+// The prompt describes the situation in English; the reply language is a rule of its own.
+const L = LABELS.en;
 
 const SHARED_RULES = `- Use only the air data and numbers given here. Never state an AQI, pollutant level, percentage, time or CO₂ figure that isn't in them, and never make up a forecast.
 - Fit everything to this household: who lives there, how they commute, their outdoor routine and their home. Protect the most sensitive members first.
@@ -63,28 +59,29 @@ function describeForecast({ parts }: Situation): string {
   const lines = PARTS_OF_DAY.map((part) => {
     const forecast = parts[part];
     return forecast
-      ? `${PART_LABEL[part]}: ${String(forecast.average)} µg/m³ (${CATEGORY_LABEL[forecast.category]})`
-      : `${PART_LABEL[part]}: not forecast`;
+      ? `${L.part[part]}: ${String(forecast.average)} µg/m³ (${L.category[forecast.category]})`
+      : `${L.part[part]}: not forecast`;
   });
   return lines.join("; ");
 }
 
-function describeHousehold(household: Household, sensitive: string[]): string {
+function describeHousehold(household: Household, groups: SensitiveGroup[]): string {
+  const sensitive = groups.map((group) => L.sensitive[group]);
   const { commute, activity, home } = household;
   const travel =
     commute.mode === "none"
       ? "doesn't commute"
-      : `${MODE_LABEL[commute.mode]}, ${String(commute.distanceKm)} km each way, ${String(commute.daysPerWeek)} days a week`;
+      : `${L.mode[commute.mode]}, ${String(commute.distanceKm)} km each way, ${String(commute.daysPerWeek)} days a week`;
   const routine =
     activity.kind === "none"
       ? "none"
-      : `${ACTIVITY_LABEL[activity.kind]}, ${String(activity.minutes)} minutes, usually in the ${activity.partOfDay}`;
+      : `${L.activity[activity.kind]}, ${String(activity.minutes)} minutes, usually in the ${activity.partOfDay}`;
   return [
     `- Most sensitive: ${sensitive.length ? sensitive.join("; ") : "no one in a sensitive group"}`,
     `- Commute: ${travel}`,
     `- Outdoor routine: ${routine}`,
-    `- Home: ${home.purifier ? "has an air purifier" : "no air purifier"}; cooks with ${COOKING_LABEL[home.cooking]}; ${home.smoker ? "someone smokes" : "no smokers"}`,
-    `- Mask: ${MASK_LABEL[household.mask]}`,
+    `- Home: ${home.purifier ? "has an air purifier" : "no air purifier"}; cooks with ${L.cooking[home.cooking]}; ${home.smoker ? "someone smokes" : "no smokers"}`,
+    `- Mask: ${L.mask[household.mask]}`,
   ].join("\n");
 }
 
@@ -96,25 +93,34 @@ function describeSituation(request: PlanRequest, situation: Situation): string {
     ? facts.map((fact) => `- ${fact.id}: ${fact.text}`).join("\n")
     : "- none apply today";
   return `Place: ${fence(place.name + region)}
-Right now: indicative AQI ${String(aqi.value)} (${CATEGORY_LABEL[aqi.category]}), set by ${aqi.dominant === "pm25" ? "PM2.5" : "PM10"}. ${describeReading(report.reading)}
-What this category means: ${CATEGORY_HEALTH[aqi.category]}
+Right now: indicative AQI ${String(aqi.value)} (${L.category[aqi.category]}), set by ${aqi.dominant === "pm25" ? "PM2.5" : "PM10"}. ${describeReading(report.reading)}
+What this category means: ${L.health[aqi.category]}
 Forecast PM2.5 for the coming day: ${describeForecast(situation)}
 
 Household:
 ${describeHousehold(household, situation.sensitive)}
 
-Impact facts (cite by id):
+Impact facts, written in the reply language (cite by id):
 ${impacts}`;
+}
+
+/** The reply language, stated last so it is fresh when the model starts writing. */
+export function languageRule(language: Language): string {
+  return language === "ta"
+    ? "Write every text field in Tamil (தமிழ்), in plain everyday Tamil as spoken in Tamil Nadu. Keep numbers as digits and units such as µg/m³, AQI, PM2.5, CO₂, km and ₹ as they are."
+    : "Write every text field in English.";
 }
 
 export function planPrompt(request: PlanRequest, situation: Situation): string {
   return `${describeSituation(request, situation)}
 
-Write today's plan for this household.`;
+Write today's plan for this household. ${languageRule(request.language)}`;
 }
 
 export function askPrompt(request: AskRequest, situation: Situation): string {
   return `${describeSituation(request, situation)}
 
-Question: ${fence(request.question)}`;
+Question: ${fence(request.question)}
+
+${languageRule(request.language)}`;
 }

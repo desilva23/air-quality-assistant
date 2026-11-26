@@ -2,10 +2,10 @@
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { AiEnvelope, PlanItem, PlanReply } from "@/lib/ai/contracts";
-import { CATEGORY_LABEL } from "@/lib/domain/aqi";
-import { PART_LABEL, PARTS_OF_DAY, type PartOfDay } from "@/lib/domain/household";
+import { PARTS_OF_DAY, type PartOfDay } from "@/lib/domain/household";
 import type { ImpactId } from "@/lib/domain/impacts";
 import type { PartForecast } from "@/lib/domain/situation";
+import { useLabels, useMessages } from "./i18n";
 import { Icon, type IconName } from "./Icon";
 import { SourceNote } from "./SourceNote";
 
@@ -27,6 +27,7 @@ const PART_ICON: Record<PartOfDay, IconName> = {
 };
 
 const ItemList = memo(function ItemList({ items, impacts }: ItemListProps) {
+  const { plan } = useMessages();
   return (
     <ul className="plan-items">
       {items.map((item) => {
@@ -39,7 +40,7 @@ const ItemList = memo(function ItemList({ items, impacts }: ItemListProps) {
               <p className="impact">
                 <Icon name="leaf" />
                 <span>
-                  <span className="impact-label">Impact:</span> {impact}
+                  <span className="impact-label">{plan.impact}</span> {impact}
                 </span>
               </p>
             )}
@@ -51,24 +52,25 @@ const ItemList = memo(function ItemList({ items, impacts }: ItemListProps) {
 });
 
 function ShareBox({ text }: { text: string }) {
-  const [copied, setCopied] = useState<string | null>(null);
+  const { plan } = useMessages();
+  const [copied, setCopied] = useState<"done" | "failed" | null>(null);
   async function copy() {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied("Copied. Paste it into your family or society group.");
+      setCopied("done");
     } catch {
-      setCopied("Copying isn't allowed here. Select the text above and copy it.");
+      setCopied("failed");
     }
   }
   return (
     <div className="share">
-      <h4>Share with your family or housing society</h4>
+      <h4>{plan.share}</h4>
       <p className="share-text">{text}</p>
       <button type="button" className="button secondary" onClick={() => void copy()}>
-        Copy message
+        {plan.copy}
       </button>
       <p role="status" className="status">
-        {copied}
+        {copied && (copied === "done" ? plan.copied : plan.copyFailed)}
       </p>
     </div>
   );
@@ -77,6 +79,8 @@ function ShareBox({ text }: { text: string }) {
 /** Today's plan: the day hour by hour, the home, and lower-emission swaps, each with its impact. */
 export const PlanPanel = memo(function PlanPanel({ envelope, parts }: PlanPanelProps) {
   const { plan, facts } = envelope.data;
+  const m = useMessages();
+  const labels = useLabels();
   const impacts = useMemo(() => new Map(facts.map((fact) => [fact.id, fact.text])), [facts]);
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -97,11 +101,11 @@ export const PlanPanel = memo(function PlanPanel({ envelope, parts }: PlanPanelP
             <section key={part} className={`part part-${forecast?.category ?? "unknown"}`}>
               <h4>
                 <Icon name={PART_ICON[part]} />
-                {PART_LABEL[part]}
+                {labels.part[part]}
               </h4>
               {forecast && (
                 <p className="part-forecast">
-                  {CATEGORY_LABEL[forecast.category]} air, PM2.5 around {forecast.average} µg/m³
+                  {m.plan.partForecast(labels.category[forecast.category], forecast.average)}
                 </p>
               )}
               <ItemList items={plan.routine[part]} impacts={impacts} />
@@ -113,14 +117,14 @@ export const PlanPanel = memo(function PlanPanel({ envelope, parts }: PlanPanelP
         <section>
           <h4>
             <Icon name="home" />
-            Cleaner air at home
+            {m.plan.home}
           </h4>
           <ItemList items={plan.indoor} impacts={impacts} />
         </section>
         <section>
           <h4>
             <Icon name="swap" />
-            Lower-emission swaps
+            {m.plan.swaps}
           </h4>
           <ItemList items={plan.alternatives} impacts={impacts} />
         </section>

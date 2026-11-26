@@ -123,10 +123,10 @@ describe("useApiCall", () => {
     expect(result.current).toMatchObject({
       status: "error",
       data: "first",
-      error: "Too many requests in a short time. Wait a minute and try again.",
+      error: "RATE_LIMITED",
     });
     await act(() => result.current.run("c"));
-    expect(result.current.error).toBe("Something went wrong on our side. Try again.");
+    expect(result.current.error).toBe("INTERNAL");
     act(() => result.current.reset());
     expect(result.current.status).toBe("idle");
   });

@@ -7,11 +7,14 @@ import { z } from "../zod";
 import { AirReportSchema, PlaceSchema } from "../domain/air";
 import { HouseholdSchema } from "../domain/household";
 import { IMPACT_IDS, ImpactFactSchema, type ImpactId } from "../domain/impacts";
+import { LanguageSchema } from "../i18n/language";
 
 export const PlanRequestSchema = z.object({
   place: PlaceSchema,
   household: HouseholdSchema,
   report: AirReportSchema,
+  /** The language every word of the reply is written in. */
+  language: LanguageSchema,
 });
 
 export type PlanRequest = z.infer<typeof PlanRequestSchema>;
@@ -19,15 +22,16 @@ export type PlanRequest = z.infer<typeof PlanRequestSchema>;
 const text = (max: number) => z.string().trim().min(1).max(max);
 
 function planSchemaFor(impactId: zod.ZodType<ImpactId | null>) {
-  const item = z.object({ action: text(140), why: text(260), impactId });
+  // Limits leave room for Tamil, which takes more characters than English to say the same.
+  const item = z.object({ action: text(220), why: text(400), impactId });
   const items = (max: number) => z.array(item).min(1).max(max);
   return z.object({
-    headline: text(160),
+    headline: text(220),
     routine: z.object({ morning: items(3), afternoon: items(3), evening: items(3) }),
     indoor: items(4),
     alternatives: items(3),
     /** A short message for a family or housing-society group. No personal details. */
-    shareText: text(400),
+    shareText: text(700),
   });
 }
 
@@ -87,22 +91,27 @@ export const AskRequestSchema = PlanRequestSchema.extend({
 
 export type AskRequest = z.infer<typeof AskRequestSchema>;
 
-export const AnswerSchema = z.object({ answer: text(800), tips: z.array(text(160)).max(3) });
+export const AnswerSchema = z.object({ answer: text(1400), tips: z.array(text(260)).max(3) });
 
 export type Answer = z.infer<typeof AnswerSchema>;
+
+/** Why a reply is the built-in guidance: AI is switched off here, or it didn't answer. */
+const FALLBACK_NOTICES = ["ai-off", "ai-failed"] as const;
+
+export type FallbackNotice = (typeof FALLBACK_NOTICES)[number];
 
 /** What every AI endpoint returns, so the interface can say where content came from. */
 export interface AiEnvelope<T> {
   source: "ai" | "fallback";
   data: T;
-  notice?: string;
+  notice?: FallbackNotice;
 }
 
 export function envelopeOf<T>(data: zod.ZodType<T>): zod.ZodType<AiEnvelope<T>> {
   return z.object({
     source: z.enum(["ai", "fallback"]),
     data,
-    notice: z.string().max(200).optional(),
+    notice: z.enum(FALLBACK_NOTICES).optional(),
   });
 }
 

@@ -1,16 +1,11 @@
 // The direct impact of each choice, computed rather than guessed. The AI may
 // only cite these facts by id, so every number a user reads comes from here.
+// This file works out the numbers; impact-text.ts words them in each language.
 
 import { z } from "../zod";
+import type { Language } from "../i18n/language";
 import type { AirReport } from "./air";
-import {
-  commuteKgPerDay,
-  formatKg,
-  formatRupees,
-  isPetrolVehicle,
-  petrolRupees,
-  weeklySavingKg,
-} from "./emissions";
+import { commuteKgPerDay, isPetrolVehicle, petrolRupees, weeklySavingKg } from "./emissions";
 import {
   commuteMinutes,
   INDOOR_SHARE,
@@ -19,13 +14,13 @@ import {
   reductionPercent,
 } from "./exposure";
 import {
-  ACTIVITY_NOUN,
   isOpenAirMode,
-  type CommuteMode,
+  isPrivateVehicle,
+  type Activity,
   type Household,
-  type Mask,
+  type PrivateVehicle,
 } from "./household";
-import { formatClock } from "./time";
+import { describeImpact } from "./impact-text";
 import { cleanestWindow, hoursFor, peakHour, usualWindow } from "./timing";
 
 export const IMPACT_IDS = [
@@ -41,9 +36,31 @@ export const IMPACT_IDS = [
 
 export type ImpactId = (typeof IMPACT_IDS)[number];
 
-export const ImpactFactSchema = z.object({ id: z.enum(IMPACT_IDS), text: z.string().max(300) });
+export const ImpactFactSchema = z.object({ id: z.enum(IMPACT_IDS), text: z.string().max(400) });
 
 export type ImpactFact = z.infer<typeof ImpactFactSchema>;
+
+type Doing = Exclude<Activity, "none">;
+
+/** What each impact measured, before it is put into words. */
+export type ImpactData =
+  | {
+      id: "shift-activity";
+      activity: Doing;
+      minutes: number;
+      from: string;
+      to: string;
+      cut: number;
+      best: number;
+      usual: number;
+    }
+  | { id: "move-indoors"; activity: Doing; cut: number; purifier: boolean }
+  | { id: "mask"; current: Household["mask"]; minutes: number; cut: number }
+  | { id: "purifier"; withPurifier: number; withoutPurifier: number }
+  | { id: "ventilate"; at: string; best: number; peak: number; peakAt: string }
+  | { id: "commute-switch"; vehicle: PrivateVehicle; km: number; kg: number; rupees: number | null }
+  | { id: "carpool"; kg: number; rupees: number }
+  | { id: "remote-day"; minutes: number; kg: number | null; rupees: number | null };
 
 interface Context {
   household: Household;
@@ -53,32 +70,9 @@ interface Context {
 /** A change smaller than this isn't worth a recommendation. */
 const MIN_SHIFT_PERCENT = 10;
 const MIN_KG = 0.1;
-
-const MASK_PHRASE: Record<Mask, string> = {
-  none: "no mask",
-  cloth: "a cloth mask",
-  surgical: "a surgical mask",
-  n95: "an N95",
-};
-
-/** Private vehicles: fuel the traveller could choose not to burn. */
-const VEHICLE_NOUN: Partial<Record<CommuteMode, string>> = {
-  "two-wheeler": "scooter or motorbike",
-  auto: "auto-rickshaw",
-  car: "car",
-};
-
 const round = Math.round;
 
-type Phrases = [string, ...string[]];
-
-/** "a", "a and b", "a, b and c". */
-function listPhrase([first, ...rest]: Phrases): string {
-  const last = rest.pop();
-  return last === undefined ? first : `${[first, ...rest].join(", ")} and ${last}`;
-}
-
-function shiftActivity({ household, report }: Context): ImpactFact | null {
+function shiftActivity({ household, report }: Context): ImpactData | null {
   const { kind, partOfDay, minutes } = household.activity;
   if (kind === "none" || minutes === 0) return null;
   const hours = hoursFor(minutes);
@@ -87,25 +81,25 @@ function shiftActivity({ household, report }: Context): ImpactFact | null {
   if (!usual || !best) return null;
   const cut = reductionPercent(usual.average, best.average);
   if (cut < MIN_SHIFT_PERCENT) return null;
+  const [from, to] = [usual.start, best.start];
   return {
     id: "shift-activity",
-    text: `Moving your ${minutes}-minute ${ACTIVITY_NOUN[kind]} from ${formatClock(usual.start)} to ${formatClock(best.start)} cuts the PM2.5 you breathe during it by about ${cut}% (forecast ${round(best.average)} vs ${round(usual.average)} µg/m³).`,
+    activity: kind,
+    minutes,
+    from,
+    to,
+    cut,
+    best: round(best.average),
+    usual: round(usual.average),
   };
 }
 
-function moveIndoors({ household }: Context): ImpactFact | null {
+function moveIndoors({ household }: Context): ImpactData | null {
   const { kind } = household.activity;
   if (kind === "none") return null;
   const { purifier } = household.home;
-  const cut = reductionPercent(
-    1,
-    purifier ? INDOOR_SHARE.withPurifier : INDOOR_SHARE.withoutPurifier,
-  );
-  const tail = purifier ? " with your purifier running" : ", and more with a purifier running";
-  return {
-    id: "move-indoors",
-    text: `Doing the ${ACTIVITY_NOUN[kind]} indoors instead cuts that dose by about ${cut}%${tail}.`,
-  };
+  const share = purifier ? INDOOR_SHARE.withPurifier : INDOOR_SHARE.withoutPurifier;
+  return { id: "move-indoors", activity: kind, cut: reductionPercent(1, share), purifier };
 }
 
 /** Minutes a day breathing street air: open-air commuting plus the outdoor activity. */
@@ -114,75 +108,77 @@ export function outdoorMinutes({ commute, activity }: Household): number {
   return travel + (activity.kind === "none" ? 0 : activity.minutes);
 }
 
-function mask({ household }: Context): ImpactFact | null {
+function mask({ household }: Context): ImpactData | null {
   const minutes = outdoorMinutes(household);
   if (household.mask === "n95" || minutes === 0) return null;
   return {
     id: "mask",
-    text: `A well-fitted N95 instead of ${MASK_PHRASE[household.mask]} cuts what you breathe in during your ${minutes} minutes outdoors by about ${maskReduction(household.mask, "n95")}%.`,
+    current: household.mask,
+    minutes,
+    cut: maskReduction(household.mask, "n95"),
   };
 }
 
-function purifier({ household, report }: Context): ImpactFact | null {
+function purifier({ household, report }: Context): ImpactData | null {
   if (household.home.purifier) return null;
   const outdoor = report.reading.pm25;
   return {
     id: "purifier",
-    text: `A purifier sized for the bedroom, with windows shut, could keep indoor PM2.5 near ${round(indoorPm25(outdoor, true))} instead of about ${round(indoorPm25(outdoor, false))} µg/m³ at today's outdoor level.`,
+    withPurifier: round(indoorPm25(outdoor, true)),
+    withoutPurifier: round(indoorPm25(outdoor, false)),
   };
 }
 
-function ventilate({ report }: Context): ImpactFact | null {
+function ventilate({ report }: Context): ImpactData | null {
   const best = cleanestWindow(report.outlook);
   const peak = peakHour(report.outlook);
   if (!best || !peak || peak.pm25 < best.average * 1.2) return null;
   return {
     id: "ventilate",
-    text: `Air the home for 10–15 minutes around ${formatClock(best.start)}, the cleanest hour forecast (${round(best.average)} µg/m³, against a peak of ${round(peak.pm25)} at ${formatClock(peak.time)}).`,
+    at: best.start,
+    best: round(best.average),
+    peak: round(peak.pm25),
+    peakAt: peak.time,
   };
 }
 
-function commuteSwitch({ household }: Context): ImpactFact | null {
+function commuteSwitch({ household }: Context): ImpactData | null {
   const { mode, distanceKm, daysPerWeek } = household.commute;
-  const vehicle = VEHICLE_NOUN[mode];
-  if (!vehicle) return null;
+  if (!isPrivateVehicle(mode)) return null;
   const kg = weeklySavingKg(mode, "metro", distanceKm, daysPerWeek);
   if (kg < MIN_KG) return null;
-  const petrol = petrolRupees(commuteKgPerDay(mode, distanceKm) * daysPerWeek);
-  const saved: Phrases = [`about ${formatKg(kg)} kg of CO₂`];
-  if (isPetrolVehicle(mode)) saved.push(`${formatRupees(petrol)} of petrol`);
+  const weeklyPetrol = petrolRupees(commuteKgPerDay(mode, distanceKm) * daysPerWeek);
   return {
     id: "commute-switch",
-    text: `Taking the metro or a bus instead of your ${vehicle} for ${distanceKm} km each way saves ${listPhrase(saved)} a week.`,
+    vehicle: mode,
+    km: distanceKm,
+    kg,
+    rupees: isPetrolVehicle(mode) ? weeklyPetrol : null,
   };
 }
 
-function carpool({ household }: Context): ImpactFact | null {
+function carpool({ household }: Context): ImpactData | null {
   const { mode, distanceKm, daysPerWeek } = household.commute;
   if (mode !== "car") return null;
   const perDay = commuteKgPerDay("car", distanceKm) - commuteKgPerDay("car", distanceKm, 3);
   const kg = perDay * daysPerWeek;
   if (kg < MIN_KG) return null;
-  return {
-    id: "carpool",
-    text: `Sharing the car with two others cuts your share of its CO₂ by about ${formatKg(kg)} kg a week, and your petrol bill by about ${formatRupees(petrolRupees(kg))} if you split the cost.`,
-  };
+  return { id: "carpool", kg, rupees: petrolRupees(kg) };
 }
 
-function remoteDay({ household }: Context): ImpactFact | null {
+function remoteDay({ household }: Context): ImpactData | null {
   const { mode, distanceKm, daysPerWeek } = household.commute;
   if (mode === "none" || daysPerWeek === 0 || distanceKm === 0) return null;
   const kg = commuteKgPerDay(mode, distanceKm);
-  const saved: Phrases = [`${String(commuteMinutes(mode, distanceKm))} minutes on the road`];
-  if (kg >= MIN_KG) saved.push(`about ${formatKg(kg)} kg of CO₂`);
-  if (isPetrolVehicle(mode)) saved.push(`${formatRupees(petrolRupees(kg))} of petrol`);
   return {
     id: "remote-day",
-    text: `One day a week at home instead of commuting saves ${listPhrase(saved)}.`,
+    minutes: commuteMinutes(mode, distanceKm),
+    kg: kg >= MIN_KG ? kg : null,
+    rupees: isPetrolVehicle(mode) ? petrolRupees(kg) : null,
   };
 }
 
-const FACTS = [
+const MEASURES = [
   shiftActivity,
   moveIndoors,
   mask,
@@ -193,7 +189,19 @@ const FACTS = [
   remoteDay,
 ];
 
-/** Every impact that applies to this household today. */
-export function impactFacts(household: Household, report: AirReport): ImpactFact[] {
-  return FACTS.map((fact) => fact({ household, report })).filter((fact) => fact !== null);
+/** Every impact that applies to this household today, as numbers. */
+function impactData(household: Household, report: AirReport): ImpactData[] {
+  return MEASURES.map((measure) => measure({ household, report })).filter((data) => data !== null);
+}
+
+/** Every impact that applies to this household today, worded in `language`. */
+export function impactFacts(
+  household: Household,
+  report: AirReport,
+  language: Language = "en",
+): ImpactFact[] {
+  return impactData(household, report).map((data) => ({
+    id: data.id,
+    text: describeImpact(data, language),
+  }));
 }

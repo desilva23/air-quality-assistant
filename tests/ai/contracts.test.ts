@@ -40,6 +40,10 @@ describe("citeOnce", () => {
 describe("AI contracts", () => {
   it("accepts a well-formed plan request and question", () => {
     expect(PlanRequestSchema.safeParse(planRequest()).success).toBe(true);
+    expect(PlanRequestSchema.safeParse(planRequest({ language: "ta" })).success).toBe(true);
+    expect(PlanRequestSchema.safeParse({ ...planRequest(), language: undefined }).success).toBe(
+      false,
+    );
     expect(
       AskRequestSchema.safeParse({ ...planRequest(), question: "Can we go out?" }).success,
     ).toBe(true);
@@ -76,7 +80,7 @@ describe("AI contracts", () => {
 
   it("wraps replies in an envelope that says where they came from", () => {
     expect(
-      PlanEnvelopeSchema.safeParse({ source: "fallback", data: reply, notice: "Built in" }).success,
+      PlanEnvelopeSchema.safeParse({ source: "fallback", data: reply, notice: "ai-off" }).success,
     ).toBe(true);
     expect(
       AnswerEnvelopeSchema.safeParse({ source: "ai", data: { answer: "Yes", tips: [] } }).success,

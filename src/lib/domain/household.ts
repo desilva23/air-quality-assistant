@@ -64,60 +64,18 @@ export const DEFAULT_HOUSEHOLD: Household = {
   mask: "none",
 };
 
-export const PART_LABEL: Record<PartOfDay, string> = {
-  morning: "Morning",
-  afternoon: "Afternoon",
-  evening: "Evening",
-};
+export type SensitiveGroup = keyof Household["members"];
 
-export const MODE_LABEL: Record<CommuteMode, string> = {
-  none: "I don't commute",
-  walk: "Walk",
-  cycle: "Cycle",
-  "two-wheeler": "Scooter or motorbike",
-  auto: "Auto-rickshaw",
-  bus: "Bus",
-  metro: "Metro or local train",
-  car: "Car",
-};
+const SENSITIVE_GROUPS: readonly SensitiveGroup[] = [
+  "children",
+  "seniors",
+  "respiratory",
+  "pregnant",
+];
 
-export const ACTIVITY_LABEL: Record<Activity, string> = {
-  none: "None",
-  walk: "Walk",
-  run: "Run or jog",
-  sport: "Sport or gym outdoors",
-  "outdoor-play": "Children's outdoor play",
-};
-
-/** The activity as a noun inside a sentence: "move the run to 2 pm". */
-export const ACTIVITY_NOUN: Record<Exclude<Activity, "none">, string> = {
-  walk: "walk",
-  run: "run",
-  sport: "outdoor sport",
-  "outdoor-play": "children's outdoor play",
-};
-
-export const MASK_LABEL: Record<Mask, string> = {
-  none: "No mask",
-  cloth: "Cloth mask",
-  surgical: "Surgical mask",
-  n95: "N95 or FFP2",
-};
-
-export const COOKING_LABEL: Record<CookingFuel, string> = {
-  gas: "LPG or piped gas",
-  electric: "Induction or electric",
-  solid: "Wood, coal, dung or kerosene",
-};
-
-/** Plain words for the people the advice must protect most. */
-export function sensitiveGroups({ members }: Household): string[] {
-  return [
-    members.children && "young children",
-    members.seniors && "older adults",
-    members.respiratory && "someone with asthma, COPD or a heart condition",
-    members.pregnant && "a pregnant family member",
-  ].filter((group) => typeof group === "string");
+/** The people the advice must protect most, most vulnerable first. */
+export function sensitiveGroups({ members }: Household): SensitiveGroup[] {
+  return SENSITIVE_GROUPS.filter((group) => members[group]);
 }
 
 /** Modes where the traveller breathes street air directly. */
@@ -125,7 +83,9 @@ export function isOpenAirMode(mode: CommuteMode): boolean {
   return ["walk", "cycle", "two-wheeler", "auto", "bus"].includes(mode);
 }
 
+export type PrivateVehicle = "two-wheeler" | "auto" | "car";
+
 /** Modes that burn fuel the traveller could choose not to burn. */
-export function isPrivateVehicle(mode: CommuteMode): boolean {
-  return ["two-wheeler", "auto", "car"].includes(mode);
+export function isPrivateVehicle(mode: CommuteMode): mode is PrivateVehicle {
+  return mode === "two-wheeler" || mode === "auto" || mode === "car";
 }

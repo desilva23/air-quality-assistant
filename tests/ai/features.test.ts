@@ -13,7 +13,7 @@ describe("AI features", () => {
     await expect(createPlan(planRequest())).resolves.toEqual(reply);
     const call = vi.mocked(generateStructured).mock.calls[0]?.[0];
     expect(call).toMatchObject({ name: "household_plan", model: "smart" });
-    expect(call?.prompt).toContain("Impact facts (cite by id):");
+    expect(call?.prompt).toContain("Impact facts, written in the reply language (cite by id):");
   });
 
   it("answers questions with the lite model", async () => {

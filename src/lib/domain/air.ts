@@ -13,32 +13,47 @@ export const PlaceSchema = z.object({
   longitude: z.number().min(INDIA_BOUNDS.minLon).max(INDIA_BOUNDS.maxLon),
 });
 
+/** How near and how recent a station reading must be to stand for a place. */
+export const STATION_RADIUS_KM = 25;
+export const STATION_MAX_AGE_HOURS = 3;
+
 /** Above any PM level recorded in India; anything higher is a sensor fault. */
 export const MAX_CONCENTRATION = 2000;
 
 const Concentration = z.number().min(0).max(MAX_CONCENTRATION);
 const Timestamp = z.iso.datetime({ offset: true });
 
-const ReadingSchema = z.object({
+const readingBase = {
   pm25: Concentration,
   pm10: Concentration.nullable(),
   measuredAt: Timestamp,
-  /** A monitoring station's measurement, or a model's estimate for the spot. */
-  kind: z.enum(["station", "model"]),
   source: z.string().max(80),
-  station: z.string().max(120).nullable(),
-  distanceKm: z.number().min(0).max(100).nullable(),
-});
+};
+
+/** A monitoring station's measurement, or a model's estimate for the spot. */
+const ReadingSchema = z.discriminatedUnion("kind", [
+  z.object({
+    ...readingBase,
+    kind: z.literal("station"),
+    station: z.string().max(120).nullable(),
+    distanceKm: z.number().min(0).max(100),
+  }),
+  z.object({ ...readingBase, kind: z.literal("model"), station: z.null(), distanceKm: z.null() }),
+]);
 
 const OutlookHourSchema = z.object({ time: Timestamp, pm25: Concentration });
+
+const AIR_NOTES = ["stations-off", "stations-down", "no-fresh-station"] as const;
+
+export type AirNote = (typeof AIR_NOTES)[number];
 
 export const AirReportSchema = z.object({
   reading: ReadingSchema,
   /** Hourly PM2.5 forecast from the current hour, up to 48 hours. */
   outlook: z.array(OutlookHourSchema).max(48),
   outlookSource: z.string().max(80).nullable(),
-  /** Why a fallback source was used, when one was. */
-  note: z.string().max(200).nullable(),
+  /** Why the model stood in for a station, when it did. A code; the browser words it. */
+  note: z.enum(AIR_NOTES).nullable(),
 });
 
 export type Place = z.infer<typeof PlaceSchema>;

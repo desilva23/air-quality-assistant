@@ -14,7 +14,7 @@ import { ASK_SYSTEM, askPrompt, PLAN_SYSTEM, planPrompt } from "./prompts";
 
 /** Today's plan, written by the model around the impacts the app computed. */
 export async function createPlan(request: PlanRequest): Promise<PlanReply> {
-  const situation = assessSituation(request.household, request.report);
+  const situation = assessSituation(request.household, request.report, request.language);
   const plan = await generateStructured({
     name: "household_plan",
     schema: planSchemaCiting(situation.facts.map((fact) => fact.id)),
@@ -29,7 +29,7 @@ export async function createPlan(request: PlanRequest): Promise<PlanReply> {
 
 /** A direct answer to the user's question about today. */
 export function answerQuestion(request: AskRequest): Promise<Answer> {
-  const situation = assessSituation(request.household, request.report);
+  const situation = assessSituation(request.household, request.report, request.language);
   return generateStructured({
     name: "answer",
     schema: AnswerSchema,

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Mukta } from "next/font/google";
+import { Baloo_2, Baloo_Thambi_2, Mukta, Mukta_Malar } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -8,6 +8,19 @@ import "./globals.css";
 // Two weights in all: Baloo 2 for big type only, Mukta for everything else.
 const display = Baloo_2({ subsets: ["latin"], weight: ["800"], variable: "--font-display" });
 const body = Mukta({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-body" });
+// Their Tamil siblings. Split by script and not preloaded, so English readers never download them.
+const displayTamil = Baloo_Thambi_2({
+  subsets: ["tamil"],
+  weight: ["800"],
+  variable: "--font-display-ta",
+  preload: false,
+});
+const bodyTamil = Mukta_Malar({
+  subsets: ["tamil"],
+  weight: ["400", "700"],
+  variable: "--font-body-ta",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "Urban Air Quality Assistant",
@@ -24,13 +37,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-IN" className={`${display.variable} ${body.variable}`}>
-      <body>
-        <a href="#main" className="skip-link">
-          Skip to content
-        </a>
-        {children}
-      </body>
+    <html
+      lang="en-IN"
+      className={[display, body, displayTamil, bodyTamil].map((font) => font.variable).join(" ")}
+    >
+      <body>{children}</body>
     </html>
   );
 }

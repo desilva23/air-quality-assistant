@@ -91,26 +91,6 @@ export function indianAqi({ pm25, pm10 }: { pm25: number; pm10: number | null })
   return { value, category: categoryOf(value), dominant: coarse > fine ? "pm10" : "pm25" };
 }
 
-export const CATEGORY_LABEL: Record<AqiCategory, string> = {
-  good: "Good",
-  satisfactory: "Satisfactory",
-  moderate: "Moderate",
-  poor: "Poor",
-  "very-poor": "Very poor",
-  severe: "Severe",
-};
-
-/** CPCB's published health impact for each category. */
-export const CATEGORY_HEALTH: Record<AqiCategory, string> = {
-  good: "Minimal impact.",
-  satisfactory: "Minor breathing discomfort for sensitive people.",
-  moderate:
-    "Breathing discomfort for people with asthma or other lung disease, heart disease, children and older adults.",
-  poor: "Breathing discomfort for most people on prolonged exposure.",
-  "very-poor": "Respiratory illness on prolonged exposure.",
-  severe: "Affects healthy people and seriously affects those with existing diseases.",
-};
-
 /** Categories where outdoor exertion should be cut back for everyone. */
 export function isUnhealthy(category: AqiCategory): boolean {
   return AQI_CATEGORIES.indexOf(category) >= AQI_CATEGORIES.indexOf("poor");

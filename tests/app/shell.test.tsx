@@ -11,17 +11,20 @@ vi.mock("@/app/globals.css", () => ({}));
 vi.mock("next/font/google", () => ({
   Baloo_2: () => ({ variable: "font-display" }),
   Mukta: () => ({ variable: "font-body" }),
+  Baloo_Thambi_2: () => ({ variable: "font-display-ta" }),
+  Mukta_Malar: () => ({ variable: "font-body-ta" }),
 }));
 
 describe("app shell", () => {
-  it("sets the language, a skip link and the page's description", () => {
+  it("sets the language, the fonts for both scripts and the page's description", () => {
     const html = renderToStaticMarkup(
       <RootLayout>
         <p>content</p>
       </RootLayout>,
     );
-    expect(html).toContain('<html lang="en-IN" class="font-display font-body">');
-    expect(html).toContain('<a href="#main" class="skip-link">Skip to content</a>');
+    expect(html).toContain(
+      '<html lang="en-IN" class="font-display font-body font-display-ta font-body-ta">',
+    );
     expect(metadata.title).toBe("Urban Air Quality Assistant");
     expect(viewport.themeColor).toHaveLength(2);
   });

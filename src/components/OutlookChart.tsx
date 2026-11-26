@@ -2,9 +2,12 @@
 
 import { memo, useMemo, useState } from "react";
 import type { OutlookHour } from "@/lib/domain/air";
-import { CATEGORY_LABEL, categoryForPm25 } from "@/lib/domain/aqi";
+import { categoryForPm25 } from "@/lib/domain/aqi";
 import { formatClock, formatHour } from "@/lib/domain/time";
 import { cleanestWindow } from "@/lib/domain/timing";
+import type { Labels } from "@/lib/i18n/labels";
+import type { Language } from "@/lib/i18n/language";
+import { useLabels, useLanguage, useMessages } from "./i18n";
 import { outlookScale, PM25_DAILY_LIMIT } from "./outlook-scale";
 
 export interface OutlookChartProps {
@@ -12,38 +15,35 @@ export interface OutlookChartProps {
   source: string | null;
 }
 
-const describe = (hour: OutlookHour): string =>
-  `${formatClock(hour.time)}, ${String(Math.round(hour.pm25))} µg/m³ (${CATEGORY_LABEL[categoryForPm25(hour.pm25)]})`;
-
-/** One sentence a screen reader reads in place of the chart. */
-function summarise(day: OutlookHour[], bestHour: OutlookHour | undefined): string {
-  const values = day.map((hour) => Math.round(hour.pm25));
-  const range = `ranges from ${String(Math.min(...values))} to ${String(Math.max(...values))} µg/m³`;
-  const best = bestHour ? ` Cleanest waking hour: ${describe(bestHour)}.` : "";
-  return `Forecast PM2.5 for the next ${String(day.length)} hours ${range}.${best}`;
+function describe(hour: OutlookHour, labels: Labels, language: Language): string {
+  const category = labels.category[categoryForPm25(hour.pm25)];
+  return `${formatClock(hour.time, language)}, ${String(Math.round(hour.pm25))} µg/m³ (${category})`;
 }
 
 /** The next 24 hours of forecast PM2.5, with the cleanest waking hour picked out. */
 export const OutlookChart = memo(function OutlookChart({ outlook, source }: OutlookChartProps) {
+  const { chart } = useMessages();
+  const labels = useLabels();
+  const language = useLanguage();
   const day = useMemo(() => outlook.slice(0, 24), [outlook]);
   const scale = useMemo(() => outlookScale(day), [day]);
   const best = useMemo(() => cleanestWindow(day), [day]);
   const [active, setActive] = useState<OutlookHour | null>(null);
 
-  if (!day.length) {
-    return <p className="note">No hourly forecast is available for this place right now.</p>;
-  }
+  if (!day.length) return <p className="note">{chart.none}</p>;
   const bestHour = day.find((hour) => hour.time === best?.start);
-  const summary = summarise(day, bestHour);
+  const values = day.map((hour) => Math.round(hour.pm25));
+  const cleanest = bestHour ? chart.cleanest(describe(bestHour, labels, language)) : "";
+  const summary = [chart.summary(day.length, Math.min(...values), Math.max(...values)), cleanest]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <figure className="outlook">
       <figcaption>
-        <strong>PM2.5 forecast, next 24 hours</strong> (µg/m³){source && <> · {source}</>}
+        <strong>{chart.caption}</strong> (µg/m³){source && <> · {source}</>}
       </figcaption>
-      <p className="outlook-readout">
-        {active ? describe(active) : bestHour ? `Cleanest waking hour: ${describe(bestHour)}` : ""}
-      </p>
+      <p className="outlook-readout">{active ? describe(active, labels, language) : cleanest}</p>
       <div className="outlook-plot" role="img" aria-label={summary}>
         {scale.ticks.map((tick) => (
           <div
@@ -55,7 +55,7 @@ export const OutlookChart = memo(function OutlookChart({ outlook, source }: Outl
           </div>
         ))}
         <div className="limit" style={{ bottom: `${String(scale.percent(PM25_DAILY_LIMIT))}%` }}>
-          <span>India&apos;s 24-hour limit</span>
+          <span>{chart.limit}</span>
         </div>
         <ol className="bars" onPointerLeave={() => setActive(null)}>
           {day.map((hour) => (
@@ -71,25 +71,25 @@ export const OutlookChart = memo(function OutlookChart({ outlook, source }: Outl
       </div>
       <ol className="outlook-axis" aria-hidden="true">
         {day.map((hour, index) => (
-          <li key={hour.time}>{index % 4 === 0 ? formatHour(hour.time) : ""}</li>
+          <li key={hour.time}>{index % 4 === 0 ? formatHour(hour.time, language) : ""}</li>
         ))}
       </ol>
       <details className="outlook-table">
-        <summary>Show the hourly values as a table</summary>
+        <summary>{chart.table}</summary>
         <table>
           <thead>
             <tr>
-              <th scope="col">Time (IST)</th>
+              <th scope="col">{chart.time}</th>
               <th scope="col">PM2.5 (µg/m³)</th>
-              <th scope="col">Category</th>
+              <th scope="col">{chart.category}</th>
             </tr>
           </thead>
           <tbody>
             {day.map((hour) => (
               <tr key={hour.time}>
-                <td>{formatClock(hour.time)}</td>
+                <td>{formatClock(hour.time, language)}</td>
                 <td>{Math.round(hour.pm25)}</td>
-                <td>{CATEGORY_LABEL[categoryForPm25(hour.pm25)]}</td>
+                <td>{labels.category[categoryForPm25(hour.pm25)]}</td>
               </tr>
             ))}
           </tbody>

@@ -1,14 +1,12 @@
 import "server-only";
-import type { AirReport, Reading } from "../domain/air";
+import type { AirNote, AirReport, Reading } from "../domain/air";
 import type { Coordinates } from "../domain/geo";
 import { openAqKey } from "../server/config";
 import { UpstreamError } from "./fetch-json";
 import { modelAir, MODEL_SOURCE, type ModelAir } from "./open-meteo";
-import { MAX_AGE_HOURS, SEARCH_RADIUS_KM, stationReading } from "./openaq";
+import { stationReading } from "./openaq";
 
 type Outcome<T> = PromiseSettledResult<T>;
-
-const MODEL_NOTE = "so this is the CAMS model's estimate for the spot.";
 
 /** The value of a settled call, or null after logging why it failed. */
 function valueOf<T>(outcome: Outcome<T>): T | null {
@@ -18,11 +16,10 @@ function valueOf<T>(outcome: Outcome<T>): T | null {
   return null;
 }
 
-/** Why the reading isn't from a station, in words the user can act on. */
-function noteFor(station: Outcome<Reading | null> | null): string {
-  if (!station) return `Station readings aren't set up on this server, ${MODEL_NOTE}`;
-  if (station.status === "rejected") return `The station network didn't respond, ${MODEL_NOTE}`;
-  return `No monitoring station within ${String(SEARCH_RADIUS_KM)} km reported in the last ${String(MAX_AGE_HOURS)} hours, ${MODEL_NOTE}`;
+/** Why the reading isn't from a station. */
+function noteFor(station: Outcome<Reading | null> | null): AirNote {
+  if (!station) return "stations-off";
+  return station.status === "rejected" ? "stations-down" : "no-fresh-station";
 }
 
 function forecastFrom(modelled: ModelAir | null): Pick<AirReport, "outlook" | "outlookSource"> {

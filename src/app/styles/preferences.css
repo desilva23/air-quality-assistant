@@ -40,6 +40,10 @@
     border-top-color: CanvasText;
   }
 
+  .language-switch button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+
   .button,
   .chip,
   .sample,

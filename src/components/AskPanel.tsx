@@ -3,6 +3,7 @@
 import { useId, useState, type SubmitEvent } from "react";
 import { MAX_QUESTION_LENGTH, MIN_QUESTION_LENGTH, type PlanRequest } from "@/lib/ai/contracts";
 import { askQuestion, useApiCall } from "@/lib/client/api";
+import { useMessages } from "./i18n";
 import { SourceNote } from "./SourceNote";
 
 export interface AskPanelProps {
@@ -10,15 +11,10 @@ export interface AskPanelProps {
   context: PlanRequest;
 }
 
-const EXAMPLES = [
-  "Can my kids play outside this evening?",
-  "When should I open the windows today?",
-  "Is it safe to go for a run tomorrow morning?",
-];
-
 /** Free-text questions about today, answered for this household from the live data. */
 export function AskPanel({ context }: AskPanelProps) {
   const id = useId();
+  const m = useMessages();
   const [question, setQuestion] = useState("");
   const ask = useApiCall(askQuestion);
 
@@ -32,7 +28,7 @@ export function AskPanel({ context }: AskPanelProps) {
     <div className="ask">
       <form onSubmit={submit}>
         <div className="field">
-          <label htmlFor={id}>Your question</label>
+          <label htmlFor={id}>{m.ask.question}</label>
           <textarea
             id={id}
             rows={2}
@@ -43,8 +39,8 @@ export function AskPanel({ context }: AskPanelProps) {
           />
         </div>
         <div className="examples">
-          <span className="small">Try:</span>
-          {EXAMPLES.map((example) => (
+          <span className="small">{m.ask.try}</span>
+          {m.ask.examples.map((example) => (
             <button
               key={example}
               type="button"
@@ -56,11 +52,11 @@ export function AskPanel({ context }: AskPanelProps) {
           ))}
         </div>
         <button type="submit" className="button primary" disabled={ask.loading}>
-          {ask.loading ? "Thinking…" : "Ask"}
+          {ask.loading ? m.ask.thinking : m.ask.ask}
         </button>
       </form>
       <div role="status" className="answer">
-        {ask.error && <p className="error">{ask.error}</p>}
+        {ask.error && <p className="error">{m.errors[ask.error]}</p>}
         {ask.data && (
           <>
             <SourceNote source={ask.data.source} notice={ask.data.notice} />

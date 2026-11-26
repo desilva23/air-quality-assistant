@@ -1,6 +1,6 @@
 // Error codes shared by the API routes and the browser. The server sends only
 // a code, never free text, so nothing about the request or the model leaks, and
-// the client owns every message the user reads.
+// the browser words every message in the reader's language (src/lib/i18n).
 
 import { z } from "./zod";
 
@@ -34,20 +34,6 @@ export const STATUS_FOR = {
   DATA_UNAVAILABLE: 503,
   INTERNAL: 500,
 } as const satisfies Partial<Record<ApiErrorCode, number>>;
-
-export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
-  CROSS_SITE: "This request has to come from the app itself.",
-  UNSUPPORTED_MEDIA_TYPE: "The app sent something the server can't read. Reload and try again.",
-  TOO_LARGE: "That request is too long. Shorten your question and try again.",
-  INVALID_INPUT: "Some details are missing or out of range. Check them and try again.",
-  RATE_LIMITED: "Too many requests in a short time. Wait a minute and try again.",
-  DATA_UNAVAILABLE: "Live air data couldn't be fetched just now. Try again in a minute.",
-  INTERNAL: "Something went wrong on our side. Try again.",
-  RESPONSE_INVALID: "The server sent an answer we couldn't trust. Try again.",
-  TIMEOUT: "The server took too long to answer. Try again.",
-  CANCELLED: "The request was cancelled.",
-  NETWORK: "Couldn't reach the server. Check your connection and try again.",
-};
 
 /** Server side: the response for a failure, carrying only its code. */
 export function errorResponse(code: keyof typeof STATUS_FOR, headers?: HeadersInit): Response {

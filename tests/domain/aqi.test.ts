@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   AQI_CATEGORIES,
-  CATEGORY_HEALTH,
-  CATEGORY_LABEL,
   categoryForPm25,
   categoryOf,
   indianAqi,
@@ -81,14 +79,7 @@ describe("indianAqi", () => {
   });
 });
 
-describe("category wording", () => {
-  it("has a label and CPCB's health note for every category", () => {
-    for (const category of AQI_CATEGORIES) {
-      expect(CATEGORY_LABEL[category]).toBeTruthy();
-      expect(CATEGORY_HEALTH[category]).toMatch(/\.$/);
-    }
-  });
-
+describe("unhealthy categories", () => {
   it("treats Poor and worse as unhealthy for everyone", () => {
     expect(AQI_CATEGORIES.filter(isUnhealthy)).toEqual(["poor", "very-poor", "severe"]);
   });

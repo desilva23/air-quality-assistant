@@ -79,16 +79,14 @@ describe("aiRoute", () => {
     expect(await unavailable.json()).toEqual({
       source: "fallback",
       data: { answer: "Built-in answer to a" },
-      notice: "AI isn't switched on for this server, so this is the built-in guidance.",
+      notice: "ai-off",
     });
     expect(console.error).not.toHaveBeenCalled();
 
     const quota = await route(() => Promise.reject(new AiProviderError("Groq returned 429", 429)))(
       post('{"question":"b"}'),
     );
-    expect((await quota.json()).notice).toBe(
-      "The AI service didn't answer, so this is the built-in guidance.",
-    );
+    expect((await quota.json()).notice).toBe("ai-failed");
     expect(console.error).toHaveBeenCalledWith("[ai:ask] Groq returned 429");
 
     await route(() => Promise.reject(new TypeError("user text here")))(post('{"question":"c"}'));

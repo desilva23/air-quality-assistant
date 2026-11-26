@@ -1,17 +1,22 @@
 // The built-in plan, used when the AI is off or fails. It follows the same
-// contract as the AI's plan and cites the same computed impacts, from fixed
-// wording chosen by today's air and the household's answers.
+// contract as the AI's plan and cites the same computed impacts, worded from
+// fixed copy in the reader's language and chosen by today's air and the
+// household's answers.
 
-import { CATEGORY_LABEL, isUnhealthy, type AqiCategory } from "../../domain/aqi";
-import { ACTIVITY_NOUN, isOpenAirMode, type PartOfDay } from "../../domain/household";
+import { isUnhealthy, type AqiCategory } from "../../domain/aqi";
+import { isOpenAirMode, type PartOfDay } from "../../domain/household";
 import type { ImpactId } from "../../domain/impacts";
 import { assessSituation, type Situation } from "../../domain/situation";
+import { LABELS, listPhrase, type Labels } from "../../i18n/labels";
 import type { Plan, PlanItem, PlanReply, PlanRequest } from "../contracts";
+import { FALLBACK_COPY, type FallbackCopy } from "./copy";
 import { alternativeItems, indoorItems } from "./plan-items";
 
 export interface Ctx {
   request: PlanRequest;
   situation: Situation;
+  copy: FallbackCopy;
+  labels: Labels;
   /** The cited id when that impact applies today, otherwise null. */
   cite: (id: ImpactId) => ImpactId | null;
 }
@@ -22,28 +27,23 @@ function categoryFor({ situation }: Ctx, part: PartOfDay): AqiCategory {
 
 function forecastWhy(ctx: Ctx, part: PartOfDay): string {
   const forecast = ctx.situation.parts[part];
+  const { category, part: partName } = ctx.labels;
   return forecast
-    ? `PM2.5 this ${part} is forecast to average ${String(forecast.average)} µg/m³ (${CATEGORY_LABEL[forecast.category]}).`
-    : `Air right now is ${CATEGORY_LABEL[ctx.situation.aqi.category]}.`;
+    ? ctx.copy.forecastWhy(partName[part], forecast.average, category[forecast.category])
+    : ctx.copy.airNow(category[ctx.situation.aqi.category]);
 }
 
 function activityItem(ctx: Ctx, part: PartOfDay): PlanItem | null {
   const { activity } = ctx.request.household;
   if (activity.kind === "none" || activity.partOfDay !== part) return null;
-  const name = ACTIVITY_NOUN[activity.kind];
+  const name = ctx.labels.activityNoun[activity.kind];
   if (!isUnhealthy(categoryFor(ctx, part))) {
-    return {
-      action: `Go ahead with the ${name}, at an easy pace.`,
-      why: forecastWhy(ctx, part),
-      impactId: null,
-    };
+    return { action: ctx.copy.goAhead(name), why: forecastWhy(ctx, part), impactId: null };
   }
   const shift = ctx.cite("shift-activity");
   return {
-    action: shift
-      ? `Move the ${name} to the cleaner hour below, or do it indoors.`
-      : `Do the ${name} indoors today.`,
-    why: `${forecastWhy(ctx, part)} Harder breathing outdoors pulls more particles deep into the lungs.`,
+    action: shift ? ctx.copy.moveToCleaner(name) : ctx.copy.doIndoors(name),
+    why: forecastWhy(ctx, part) + ctx.copy.deeperBreathing,
     impactId: shift ?? ctx.cite("move-indoors"),
   };
 }
@@ -51,26 +51,32 @@ function activityItem(ctx: Ctx, part: PartOfDay): PlanItem | null {
 function commuteItem(ctx: Ctx, part: PartOfDay): PlanItem | null {
   const { mode } = ctx.request.household.commute;
   if (mode === "none" || part === "afternoon" || !isUnhealthy(categoryFor(ctx, part))) return null;
+  const homeward = part === "evening";
   if (isOpenAirMode(mode)) {
     return {
-      action: `Wear a well-fitted N95 for the ${part === "morning" ? "ride in" : "ride home"}.`,
-      why: `${forecastWhy(ctx, part)} You breathe street air directly on this trip.`,
+      action: ctx.copy.maskRide(homeward),
+      why: forecastWhy(ctx, part) + ctx.copy.streetAir,
       impactId: ctx.cite("mask"),
     };
   }
   return {
-    action: `Keep car windows shut and the AC on recirculate ${part === "morning" ? "on the way in" : "on the way home"}.`,
-    why: `${forecastWhy(ctx, part)} Closed windows keep most traffic smoke out of the cabin.`,
+    action: ctx.copy.carWindows(homeward),
+    why: forecastWhy(ctx, part) + ctx.copy.closedWindows,
     impactId: null,
   };
 }
 
+function sensitiveNames({ situation, labels }: Ctx): string[] {
+  return situation.sensitive.map((group) => labels.sensitive[group]);
+}
+
 function generalItem(ctx: Ctx, part: PartOfDay): PlanItem {
-  const unhealthy = isUnhealthy(categoryFor(ctx, part));
-  const sensitive = ctx.situation.sensitive.length > 0;
-  const action = unhealthy
-    ? `Keep ${sensitive ? ctx.situation.sensitive.join(" and ") : "everyone"} indoors where you can, with windows shut.`
-    : `Fine for errands and time outdoors${sensitive ? ", keeping effort light for the most sensitive" : ""}.`;
+  const names = sensitiveNames(ctx);
+  const action = isUnhealthy(categoryFor(ctx, part))
+    ? ctx.copy.keepIndoors(
+        names.length ? listPhrase(names, ctx.request.language) : ctx.copy.everyone,
+      )
+    : ctx.copy.fineOutdoors(names.length > 0);
   return { action, why: forecastWhy(ctx, part), impactId: null };
 }
 
@@ -79,31 +85,43 @@ function routineFor(ctx: Ctx, part: PartOfDay): PlanItem[] {
   return items.length ? items : [generalItem(ctx, part)];
 }
 
-function headline({ request, situation }: Ctx): string {
-  const { aqi } = situation;
-  const [mostSensitive] = situation.sensitive;
-  const care =
-    mostSensitive && isUnhealthy(aqi.category) ? `: extra care for ${mostSensitive}` : "";
-  return `${CATEGORY_LABEL[aqi.category]} air in ${request.place.name} today (AQI ${String(aqi.value)})${care}`;
+function headline(ctx: Ctx): string {
+  const { aqi } = ctx.situation;
+  const [mostSensitive] = sensitiveNames(ctx);
+  const care = mostSensitive && isUnhealthy(aqi.category) ? mostSensitive : null;
+  return ctx.copy.headline(
+    ctx.request.place.name,
+    ctx.labels.category[aqi.category],
+    aqi.value,
+    care,
+  );
 }
 
 function shareText(ctx: Ctx, plan: Omit<Plan, "shareText">): string {
   const { aqi } = ctx.situation;
+  const { request } = ctx;
+  const lead = ctx.copy.shareLead(
+    request.place.name,
+    ctx.labels.category[aqi.category],
+    aqi.value,
+    request.report.reading.source,
+  );
   const tips = [...plan.routine.morning, ...plan.indoor, ...plan.alternatives]
     .slice(0, 3)
     .map((item) => `• ${item.action}`);
-  return [
-    `Air in ${ctx.request.place.name} today: ${CATEGORY_LABEL[aqi.category]}, AQI ${String(aqi.value)}. Source: ${ctx.request.report.reading.source}.`,
-    ...tips,
-  ]
-    .join("\n")
-    .slice(0, 400);
+  return [lead, ...tips].join("\n").slice(0, 700);
 }
 
 export function contextFor(request: PlanRequest): Ctx {
-  const situation = assessSituation(request.household, request.report);
+  const situation = assessSituation(request.household, request.report, request.language);
   const ids = new Set(situation.facts.map((fact) => fact.id));
-  return { request, situation, cite: (id) => (ids.has(id) ? id : null) };
+  return {
+    request,
+    situation,
+    copy: FALLBACK_COPY[request.language],
+    labels: LABELS[request.language],
+    cite: (id) => (ids.has(id) ? id : null),
+  };
 }
 
 export function planFrom(ctx: Ctx): PlanReply {
@@ -120,7 +138,7 @@ export function planFrom(ctx: Ctx): PlanReply {
   return { plan: { ...body, shareText: shareText(ctx, body) }, facts: ctx.situation.facts };
 }
 
-/** The built-in plan for this household and today's air. */
+/** The built-in plan for this household and today's air, in the request's language. */
 export function planFallback(request: PlanRequest): PlanReply {
   return planFrom(contextFor(request));
 }

@@ -21,17 +21,12 @@ describe("household", () => {
     expect(HouseholdSchema.safeParse(badDays).success).toBe(false);
   });
 
-  it("names the people who need most care, in plain words", () => {
+  it("lists the people who need most care, most vulnerable first", () => {
     expect(sensitiveGroups(household())).toEqual([]);
     const everyone = household({
       members: { children: true, seniors: true, respiratory: true, pregnant: true },
     });
-    expect(sensitiveGroups(everyone)).toEqual([
-      "young children",
-      "older adults",
-      "someone with asthma, COPD or a heart condition",
-      "a pregnant family member",
-    ]);
+    expect(sensitiveGroups(everyone)).toEqual(["children", "seniors", "respiratory", "pregnant"]);
   });
 
   it("knows which travel modes breathe street air and which burn private fuel", () => {

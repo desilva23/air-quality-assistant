@@ -111,7 +111,7 @@ describe("situation", () => {
       afternoon: { average: 84, category: "moderate" },
       evening: { average: 200, category: "very-poor" },
     });
-    expect(situation.sensitive).toEqual(["young children"]);
+    expect(situation.sensitive).toEqual(["children"]);
     expect(situation.facts).toHaveLength(8);
   });
 

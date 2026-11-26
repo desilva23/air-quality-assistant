@@ -2,7 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import type { z } from "zod";
 import { errorResponse } from "../api-errors";
-import { envelopeOf, type AiEnvelope } from "../ai/contracts";
+import { envelopeOf, type AiEnvelope, type FallbackNotice } from "../ai/contracts";
 import { AiProviderError, AiUnavailableError } from "../ai/errors";
 import { jsonResponse, NO_STORE, readLimitedBody, refusal } from "./request";
 import { createStores } from "./stores";
@@ -50,10 +50,9 @@ function logFailure(name: string, error: unknown): void {
   else console.error(`[ai:${name}] ${error instanceof Error ? error.name : "UnknownError"}`);
 }
 
-function fallbackNotice(error: unknown): string {
-  return error instanceof AiUnavailableError
-    ? "AI isn't switched on for this server, so this is the built-in guidance."
-    : "The AI service didn't answer, so this is the built-in guidance.";
+/** A code, not words: the browser says it in the reader's language. */
+function fallbackNotice(error: unknown): FallbackNotice {
+  return error instanceof AiUnavailableError ? "ai-off" : "ai-failed";
 }
 
 /**

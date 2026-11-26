@@ -4,7 +4,8 @@
 
 import type { AirReport, OutlookHour } from "./air";
 import { categoryForPm25, indianAqi, type AqiCategory, type AqiResult } from "./aqi";
-import { sensitiveGroups, type Household, type PartOfDay } from "./household";
+import type { Language } from "../i18n/language";
+import { sensitiveGroups, type Household, type PartOfDay, type SensitiveGroup } from "./household";
 import { impactFacts, type ImpactFact } from "./impacts";
 import { partAverages } from "./timing";
 
@@ -32,15 +33,19 @@ export function partForecasts(outlook: OutlookHour[]): Record<PartOfDay, PartFor
 export interface Situation {
   aqi: AqiResult;
   parts: Record<PartOfDay, PartForecast | null>;
-  sensitive: string[];
+  sensitive: SensitiveGroup[];
   facts: ImpactFact[];
 }
 
-export function assessSituation(household: Household, report: AirReport): Situation {
+export function assessSituation(
+  household: Household,
+  report: AirReport,
+  language: Language = "en",
+): Situation {
   return {
     aqi: indianAqi(report.reading),
     parts: partForecasts(report.outlook),
     sensitive: sensitiveGroups(household),
-    facts: impactFacts(household, report),
+    facts: impactFacts(household, report, language),
   };
 }

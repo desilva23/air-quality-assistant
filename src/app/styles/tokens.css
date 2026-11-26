@@ -2,8 +2,9 @@
 
 :root {
   color-scheme: light dark;
-  --font-heading: var(--font-display), "Baloo 2", system-ui, sans-serif;
-  --font-text: var(--font-body), "Mukta", system-ui, sans-serif;
+  /* Latin glyphs come from the first face, Tamil ones from its sibling. */
+  --font-heading: var(--font-display), var(--font-display-ta), "Baloo 2", system-ui, sans-serif;
+  --font-text: var(--font-body), var(--font-body-ta), "Mukta", system-ui, sans-serif;
 
   --paper: #f2f5f8;
   --card: #ffffff;

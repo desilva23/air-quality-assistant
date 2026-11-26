@@ -13,7 +13,7 @@ Household:
 - Home: no air purifier; cooks with LPG or piped gas; no smokers
 - Mask: No mask
 
-Impact facts (cite by id):
+Impact facts, written in the reply language (cite by id):
 - shift-activity: Moving your 60-minute children's outdoor play from 6:00 pm to 2:00 pm cuts the PM2.5 you breathe during it by about 67% (forecast 70 vs 210 µg/m³).
 - move-indoors: Doing the children's outdoor play indoors instead cuts that dose by about 30%, and more with a purifier running.
 - mask: A well-fitted N95 instead of no mask cuts what you breathe in during your 60 minutes outdoors by about 75%.
@@ -23,5 +23,5 @@ Impact facts (cite by id):
 - carpool: Sharing the car with two others cuts your share of its CO₂ by about 14 kg a week, and your petrol bill by about ₹590 if you split the cost.
 - remote-day: One day a week at home instead of commuting saves 82 minutes on the road, about 4.2 kg of CO₂ and ₹180 of petrol.
 
-Write today's plan for this household."
+Write today's plan for this household. Write every text field in English."
 `;

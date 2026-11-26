@@ -68,5 +68,5 @@ export function household(patch: Partial<Household> = {}): Household {
 }
 
 export function planRequest(overrides: Partial<PlanRequest> = {}): PlanRequest {
-  return { place: PLACE, household: FAMILY, report: report(), ...overrides };
+  return { place: PLACE, household: FAMILY, report: report(), language: "en", ...overrides };
 }

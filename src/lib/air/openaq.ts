@@ -4,13 +4,16 @@ import "server-only";
 // PM2.5 recently.
 
 import { z } from "../zod";
-import { MAX_CONCENTRATION, type Reading } from "../domain/air";
+import {
+  MAX_CONCENTRATION,
+  STATION_MAX_AGE_HOURS,
+  STATION_RADIUS_KM,
+  type Reading,
+} from "../domain/air";
 import { distanceKm, type Coordinates } from "../domain/geo";
 import { fetchJson, urlWith } from "./fetch-json";
 
 const BASE_URL = "https://api.openaq.org/v3";
-export const SEARCH_RADIUS_KM = 25;
-export const MAX_AGE_HOURS = 3;
 const PM25_PARAMETER_ID = "2";
 const MICROGRAMS = "µg/m³";
 
@@ -39,7 +42,7 @@ type Location = z.infer<typeof LocationSchema>;
 type Latest = z.infer<typeof LatestReplySchema>["results"];
 
 const isFresh = (utc: string, now: number): boolean =>
-  now - Date.parse(utc) <= MAX_AGE_HOURS * 3_600_000;
+  now - Date.parse(utc) <= STATION_MAX_AGE_HOURS * 3_600_000;
 
 /** Plausible concentrations only; networks sometimes report placeholders like -999. */
 const plausible = (value: number): boolean => value >= 0 && value <= MAX_CONCENTRATION;
@@ -73,7 +76,7 @@ export async function stationReading(
   const options = { source: "OpenAQ", headers: { "X-API-Key": apiKey } };
   const search = urlWith(`${BASE_URL}/locations`, {
     coordinates: `${String(point.latitude)},${String(point.longitude)}`,
-    radius: String(SEARCH_RADIUS_KM * 1000),
+    radius: String(STATION_RADIUS_KM * 1000),
     parameters_id: PM25_PARAMETER_ID,
     limit: "20",
   });

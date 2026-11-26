@@ -2,9 +2,10 @@
 
 import { memo } from "react";
 import type { AirReport, Reading } from "@/lib/domain/air";
-import { CATEGORY_HEALTH, type AqiResult } from "@/lib/domain/aqi";
-import { cigarettesPerDay, WHO_PM25_DAILY, whoMultiple } from "@/lib/domain/exposure";
+import type { AqiResult } from "@/lib/domain/aqi";
+import { cigarettesPerDay, whoMultiple } from "@/lib/domain/exposure";
 import { formatClock } from "@/lib/domain/time";
+import { useLabels, useLanguage, useMessages } from "./i18n";
 import { OutlookChart } from "./OutlookChart";
 
 export interface AirNowProps {
@@ -13,10 +14,12 @@ export interface AirNowProps {
 }
 
 function SourceDetails({ reading }: { reading: Reading }) {
+  const { air } = useMessages();
+  const language = useLanguage();
   const where =
     reading.kind === "station"
-      ? `${reading.station ?? "Monitoring station"}, ${String(reading.distanceKm)} km away`
-      : "Model estimate for this spot";
+      ? air.away(reading.station ?? air.station, reading.distanceKm)
+      : air.modelSpot;
   return (
     <dl className="readings">
       <div className="tile">
@@ -30,17 +33,17 @@ function SourceDetails({ reading }: { reading: Reading }) {
         </div>
       )}
       <div className="tile wide">
-        <dt>Source</dt>
+        <dt>{air.source}</dt>
         <dd>{reading.source}</dd>
       </div>
       <div className="tile wide">
-        <dt>Where</dt>
+        <dt>{air.where}</dt>
         <dd>{where}</dd>
       </div>
       <div className="tile">
-        <dt>{reading.kind === "station" ? "Measured" : "For"}</dt>
+        <dt>{reading.kind === "station" ? air.measured : air.forTime}</dt>
         <dd>
-          <time dateTime={reading.measuredAt}>{formatClock(reading.measuredAt)} IST</time>
+          <time dateTime={reading.measuredAt}>{formatClock(reading.measuredAt, language)} IST</time>
         </dd>
       </div>
     </dl>
@@ -49,29 +52,18 @@ function SourceDetails({ reading }: { reading: Reading }) {
 
 /** What today's air means for health, exactly where the numbers came from, and the day ahead. */
 export const AirNow = memo(function AirNow({ report, aqi }: AirNowProps) {
+  const { air } = useMessages();
+  const labels = useLabels();
   const { reading } = report;
-  const cigarettes = cigarettesPerDay(reading.pm25);
   const who = whoMultiple(reading.pm25);
 
   return (
     <div className="air-now">
-      <p className="health">{CATEGORY_HEALTH[aqi.category]}</p>
-      <p className="who">
-        {who > 1 ? (
-          <>
-            PM2.5 is <strong>{who}×</strong> the WHO 24-hour guideline ({WHO_PM25_DAILY} µg/m³).
-          </>
-        ) : (
-          <>PM2.5 is within the WHO 24-hour guideline ({WHO_PM25_DAILY} µg/m³).</>
-        )}
-      </p>
+      <p className="health">{labels.health[aqi.category]}</p>
+      <p className="who">{who > 1 ? air.who(who) : air.withinWho}</p>
       <SourceDetails reading={reading} />
-      {report.note && <p className="note">{report.note}</p>}
-      <p className="small">
-        If the air stayed like this all day, breathing it would do roughly the harm of smoking{" "}
-        <strong>{cigarettes} cigarettes</strong> (Berkeley Earth&apos;s rule of thumb: 22 µg/m³ of
-        PM2.5 for a day ≈ one cigarette).
-      </p>
+      {report.note && <p className="note">{air.notes[report.note]}</p>}
+      <p className="small">{air.cigarettes(cigarettesPerDay(reading.pm25))}</p>
       <OutlookChart outlook={report.outlook} source={report.outlookSource} />
     </div>
   );

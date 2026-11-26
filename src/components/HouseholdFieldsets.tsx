@@ -2,42 +2,39 @@
 
 import {
   ACTIVITIES,
-  ACTIVITY_LABEL,
   COMMUTE_MODES,
   COOKING_FUELS,
-  COOKING_LABEL,
-  MASK_LABEL,
   MASKS,
   MAX_ACTIVITY_MINUTES,
   MAX_COMMUTE_KM,
-  MODE_LABEL,
-  PART_LABEL,
   PARTS_OF_DAY,
   type Household,
   type Mask,
 } from "@/lib/domain/household";
 import { CheckboxField, NumberField, SelectField } from "./fields";
+import { useLabels, useMessages } from "./i18n";
 
 export interface SectionProps<K extends keyof Household> {
   value: Household[K];
   onChange: (patch: Partial<Household[K]>) => void;
 }
 
-const MEMBERS: readonly { key: keyof Household["members"]; label: string }[] = [
-  { key: "children", label: "Children under 12" },
-  { key: "seniors", label: "Adults over 60" },
-  { key: "respiratory", label: "Someone with asthma, COPD or a heart condition" },
-  { key: "pregnant", label: "Someone who is pregnant" },
+const MEMBERS: readonly (keyof Household["members"])[] = [
+  "children",
+  "seniors",
+  "respiratory",
+  "pregnant",
 ];
 
 export function MembersFieldset({ value, onChange }: SectionProps<"members">) {
+  const { household } = useMessages();
   return (
     <fieldset>
-      <legend>Who lives with you?</legend>
-      {MEMBERS.map(({ key, label }) => (
+      <legend>{household.members}</legend>
+      {MEMBERS.map((key) => (
         <CheckboxField
           key={key}
-          label={label}
+          label={household.member[key]}
           checked={value[key]}
           onChange={(checked) => onChange({ [key]: checked })}
         />
@@ -47,22 +44,24 @@ export function MembersFieldset({ value, onChange }: SectionProps<"members">) {
 }
 
 export function CommuteFieldset({ value, onChange }: SectionProps<"commute">) {
+  const { household } = useMessages();
+  const labels = useLabels();
   return (
     <fieldset>
-      <legend>Daily commute</legend>
+      <legend>{household.commute}</legend>
       <SelectField
-        label="How you usually travel"
+        label={household.travel}
         value={value.mode}
         options={COMMUTE_MODES}
-        labels={MODE_LABEL}
+        labels={labels.mode}
         onChange={(mode) => onChange({ mode })}
       />
       {value.mode !== "none" && (
         <div className="field-row">
           <NumberField
             key={`km-${String(value.distanceKm)}`}
-            label="Distance each way"
-            unit="km"
+            label={household.distance}
+            unit={household.km}
             value={value.distanceKm}
             min={0}
             max={MAX_COMMUTE_KM}
@@ -71,7 +70,7 @@ export function CommuteFieldset({ value, onChange }: SectionProps<"commute">) {
           />
           <NumberField
             key={`days-${String(value.daysPerWeek)}`}
-            label="Days a week"
+            label={household.days}
             value={value.daysPerWeek}
             min={0}
             max={7}
@@ -84,29 +83,31 @@ export function CommuteFieldset({ value, onChange }: SectionProps<"commute">) {
 }
 
 export function ActivityFieldset({ value, onChange }: SectionProps<"activity">) {
+  const { household } = useMessages();
+  const labels = useLabels();
   return (
     <fieldset>
-      <legend>Outdoor routine</legend>
+      <legend>{household.routine}</legend>
       <SelectField
-        label="Main outdoor activity"
+        label={household.activity}
         value={value.kind}
         options={ACTIVITIES}
-        labels={ACTIVITY_LABEL}
+        labels={labels.activity}
         onChange={(kind) => onChange({ kind })}
       />
       {value.kind !== "none" && (
         <div className="field-row">
           <SelectField
-            label="Usually in the"
+            label={household.partOfDay}
             value={value.partOfDay}
             options={PARTS_OF_DAY}
-            labels={PART_LABEL}
+            labels={labels.part}
             onChange={(partOfDay) => onChange({ partOfDay })}
           />
           <NumberField
             key={`minutes-${String(value.minutes)}`}
-            label="For how long"
-            unit="minutes"
+            label={household.duration}
+            unit={household.minutes}
             value={value.minutes}
             min={0}
             max={MAX_ACTIVITY_MINUTES}
@@ -125,31 +126,33 @@ export interface HomeFieldsetProps extends SectionProps<"home"> {
 }
 
 export function HomeFieldset({ value, onChange, mask, onMaskChange }: HomeFieldsetProps) {
+  const { household } = useMessages();
+  const labels = useLabels();
   return (
     <fieldset>
-      <legend>Home and habits</legend>
+      <legend>{household.home}</legend>
       <CheckboxField
-        label="We have an air purifier"
+        label={household.purifier}
         checked={value.purifier}
         onChange={(purifier) => onChange({ purifier })}
       />
       <CheckboxField
-        label="Someone smokes at home"
+        label={household.smoker}
         checked={value.smoker}
         onChange={(smoker) => onChange({ smoker })}
       />
       <SelectField
-        label="Cooking fuel"
+        label={household.cooking}
         value={value.cooking}
         options={COOKING_FUELS}
-        labels={COOKING_LABEL}
+        labels={labels.cooking}
         onChange={(cooking) => onChange({ cooking })}
       />
       <SelectField
-        label="Mask you usually wear outside"
+        label={household.mask}
         value={mask}
         options={MASKS}
-        labels={MASK_LABEL}
+        labels={labels.mask}
         onChange={onMaskChange}
       />
     </fieldset>

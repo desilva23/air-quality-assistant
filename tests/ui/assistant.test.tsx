@@ -21,7 +21,7 @@ function stubApi() {
       return json({
         source: "fallback",
         data: planFallback(request),
-        notice: "Built-in guidance for testing.",
+        notice: "ai-off",
       });
     }
     return json({
@@ -55,7 +55,7 @@ describe("AssistantApp", () => {
       name: /Very poor air in New Delhi today/,
     });
     await waitFor(() => expect(plan).toHaveFocus());
-    expect(screen.getByText("Built-in guidance for testing.")).toBeInTheDocument();
+    expect(screen.getByText(/AI isn't switched on for this server/)).toBeInTheDocument();
 
     await user.click(screen.getByLabelText("Adults over 60"));
     expect(screen.getByText(/changed since this plan was made/)).toBeInTheDocument();

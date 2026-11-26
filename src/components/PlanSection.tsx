@@ -4,6 +4,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import type { PlanRequest } from "@/lib/ai/contracts";
 import { requestPlan, useApiCall } from "@/lib/client/api";
 import { partForecasts } from "@/lib/domain/situation";
+import { useMessages } from "./i18n";
 
 // Below the first screen, so its code loads only when a plan arrives.
 const PlanPanel = lazy(() => import("./PlanPanel").then((m) => ({ default: m.PlanPanel })));
@@ -15,6 +16,7 @@ export interface PlanSectionProps {
 
 /** Builds today's plan on request, and says when it no longer matches the answers. */
 export function PlanSection({ request }: PlanSectionProps) {
+  const m = useMessages();
   const plan = useApiCall(requestPlan);
   const [plannedFor, setPlannedFor] = useState<PlanRequest | null>(null);
   const parts = useMemo(() => partForecasts(plannedFor?.report.outlook ?? []), [plannedFor]);
@@ -26,30 +28,24 @@ export function PlanSection({ request }: PlanSectionProps) {
 
   return (
     <section aria-labelledby="plan-heading" className="card span-all plan-card">
-      <h2 id="plan-heading">Today&apos;s plan</h2>
-      {!request && (
-        <p className="muted">Choose a place first: the plan is built from its live air.</p>
-      )}
+      <h2 id="plan-heading">{m.plan.heading}</h2>
+      {!request && <p className="muted">{m.plan.choosePlace}</p>}
       <button
         type="button"
         className="button primary"
         onClick={request ? () => build(request) : undefined}
         disabled={!request || plan.loading}
       >
-        {plan.loading ? "Building your plan…" : "Build today's plan"}
+        {plan.loading ? m.plan.building : m.plan.build}
       </button>
       {plan.error && (
         <p role="alert" className="error">
-          {plan.error}
+          {m.errors[plan.error]}
         </p>
       )}
-      {plan.data && plannedFor !== request && (
-        <p className="note">
-          Your place or answers changed since this plan was made. Build it again to update it.
-        </p>
-      )}
+      {plan.data && plannedFor !== request && <p className="note">{m.plan.changed}</p>}
       {plan.data && (
-        <Suspense fallback={<p>Loading the plan…</p>}>
+        <Suspense fallback={<p>{m.plan.loading}</p>}>
           <PlanPanel envelope={plan.data} parts={parts} />
         </Suspense>
       )}

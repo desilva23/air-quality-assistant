@@ -122,6 +122,40 @@ h3[tabindex="-1"]:focus {
   color: var(--metro-ink);
 }
 
+.header-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.language-switch {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--frost);
+  border: 1px solid var(--frost-line);
+}
+
+.language-switch button {
+  min-height: 38px;
+  min-width: 44px;
+  padding: 0.2rem 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.language-switch button[aria-pressed="true"] {
+  background: var(--metro);
+  color: var(--metro-ink);
+}
+
 .ai-status {
   margin: 0;
   font-size: 0.9rem;

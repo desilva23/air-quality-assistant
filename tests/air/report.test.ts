@@ -50,18 +50,16 @@ describe("airReport", () => {
     const result = await airReport(point);
     expect(stationReading).not.toHaveBeenCalled();
     expect(result.reading).toEqual(MODEL_READING);
-    expect(result.note).toMatch(/^Station readings aren't set up on this server/);
+    expect(result.note).toBe("stations-off");
   });
 
   it("says when the station network failed or had nothing recent", async () => {
     vi.stubEnv("OPENAQ_API_KEY", "key");
     vi.mocked(stationReading).mockRejectedValueOnce("not an error");
-    expect((await airReport(point)).note).toMatch(/^The station network didn't respond/);
+    expect((await airReport(point)).note).toBe("stations-down");
     expect(console.error).toHaveBeenCalledWith("[air] UnknownError");
     vi.mocked(stationReading).mockResolvedValueOnce(null);
-    expect((await airReport(point)).note).toMatch(
-      /^No monitoring station within 25 km reported in the last 3 hours/,
-    );
+    expect((await airReport(point)).note).toBe("no-fresh-station");
   });
 
   it("fails when neither source answers", async () => {

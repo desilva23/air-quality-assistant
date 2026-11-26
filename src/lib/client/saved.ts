@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 import type { z } from "zod";
 import { PlaceSchema, type Place } from "../domain/air";
 import { DEFAULT_HOUSEHOLD, HouseholdSchema, type Household } from "../domain/household";
+import { LanguageSchema, type Language } from "../i18n/language";
 
 interface SavedStore<T> {
   subscribe: (listener: () => void) => () => void;
@@ -55,6 +56,7 @@ export function createSavedStore<T>(key: string, schema: z.ZodType<T>, initial: 
 
 const household = createSavedStore("aqa:household:v1", HouseholdSchema, DEFAULT_HOUSEHOLD);
 const place = createSavedStore<Place | null>("aqa:place:v1", PlaceSchema.nullable(), null);
+const language = createSavedStore<Language>("aqa:language:v1", LanguageSchema, "en");
 
 function useSaved<T>(store: SavedStore<T>): [T, (value: T) => void] {
   const value = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
@@ -63,3 +65,4 @@ function useSaved<T>(store: SavedStore<T>): [T, (value: T) => void] {
 
 export const useHousehold = (): [Household, (value: Household) => void] => useSaved(household);
 export const usePlace = (): [Place | null, (value: Place | null) => void] => useSaved(place);
+export const useSavedLanguage = (): [Language, (value: Language) => void] => useSaved(language);

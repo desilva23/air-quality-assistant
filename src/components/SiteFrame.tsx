@@ -1,23 +1,51 @@
+"use client";
+
 import type { ReactNode } from "react";
 import type { AqiCategory } from "@/lib/domain/aqi";
+import { LANGUAGE_NAME, LANGUAGES, type Language } from "@/lib/i18n/language";
+import { useLanguage, useMessages } from "./i18n";
 import { Icon } from "./Icon";
 
 export interface SiteHeaderProps {
   aiEnabled: boolean;
+  onLanguage: (language: Language) => void;
 }
 
-export function SiteHeader({ aiEnabled }: SiteHeaderProps) {
+/** English or Tamil; the current one is pressed. Names are written in their own script. */
+function LanguageSwitch({ onLanguage }: { onLanguage: (language: Language) => void }) {
+  const current = useLanguage();
+  const m = useMessages();
+  return (
+    <div className="language-switch" role="group" aria-label={m.language}>
+      {LANGUAGES.map((language) => (
+        <button
+          key={language}
+          type="button"
+          lang={language}
+          aria-pressed={language === current}
+          onClick={() => onLanguage(language)}
+        >
+          {LANGUAGE_NAME[language]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function SiteHeader({ aiEnabled, onLanguage }: SiteHeaderProps) {
+  const m = useMessages();
   return (
     <header className="site-header">
       <p className="brand">
         <span className="brand-mark">
           <Icon name="wind" />
         </span>
-        Urban Air Quality Assistant
+        {m.brand}
       </p>
-      <p className={`ai-status ${aiEnabled ? "on" : "off"}`}>
-        {aiEnabled ? "AI on (Groq)" : "AI off: built-in guidance"}
-      </p>
+      <div className="header-tools">
+        <LanguageSwitch onLanguage={onLanguage} />
+        <p className={`ai-status ${aiEnabled ? "on" : "off"}`}>{aiEnabled ? m.aiOn : m.aiOff}</p>
+      </div>
     </header>
   );
 }
@@ -34,28 +62,26 @@ export function SkyBand({ category, children }: SkyBandProps) {
 }
 
 export function Intro() {
+  const m = useMessages();
   return (
     <div className="intro">
-      <h1>Plan a cleaner-air day for your household</h1>
-      <p className="lede">
-        See the air outside right now, anywhere in India. Then get a plan for your family&apos;s
-        day: when to go out, how to travel and what to do at home, with what each choice saves.
-      </p>
+      <h1>{m.title}</h1>
+      <p className="lede">{m.lede}</p>
     </div>
   );
 }
 
 export function SiteFooter() {
+  const { footer } = useMessages();
   return (
     <footer className="site-footer">
       <p>
-        Air data: <a href="https://openaq.org">OpenAQ</a> station measurements (including CPCB
-        stations) and the <a href="https://open-meteo.com">Open-Meteo</a> air quality model
-        (Copernicus CAMS, CC BY 4.0). Places: Open-Meteo geocoding.
+        {footer.data} <a href="https://openaq.org">OpenAQ</a> {footer.stations}{" "}
+        <a href="https://open-meteo.com">Open-Meteo</a> {footer.model}
       </p>
-      <p>General guidance, not medical advice. See a doctor for breathlessness or chest pain.</p>
+      <p>{footer.medical}</p>
       <p>
-        <a href="https://github.com/desilva23/air-quality-assistant">Source code on GitHub</a>
+        <a href="https://github.com/desilva23/air-quality-assistant">{footer.code}</a>
       </p>
     </footer>
   );
