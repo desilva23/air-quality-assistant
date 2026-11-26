@@ -61,3 +61,21 @@ test("a town can be found by name, and answers are remembered on reload", async 
   await expect(page.getByRole("heading", { name: "Air in Noida now" })).toBeVisible();
   await expect(page.getByLabel("Adults over 60")).toBeChecked();
 });
+
+test("the extra panels show nearby stations, a what-if and every way to commute", async ({
+  page,
+}) => {
+  await openDelhiFamily(page);
+  await expect(page.getByRole("rowheader", { name: "ITO, Delhi - CPCB" })).toBeVisible();
+  await expect(page.locator(".leaflet-interactive")).toHaveCount(3);
+  await page
+    .getByRole("region", { name: /Map of nearby monitoring stations/ })
+    .scrollIntoViewIfNeeded();
+
+  const choices = page.locator(".choices-card");
+  await choices.getByLabel("Mask you usually wear outside").selectOption({ label: "N95 or FFP2" });
+  await expect(choices.getByText(/^These choices cut your dose by/)).toBeVisible();
+
+  await expect(page.getByRole("rowheader", { name: "Car (yours)" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "₹880" })).toBeVisible();
+});

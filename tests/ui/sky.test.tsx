@@ -51,7 +51,9 @@ describe("SkyBand", () => {
 
 describe("revealing the reading", () => {
   it("scrolls the new reading into view after a pick, but not for a place restored on load", async () => {
-    stubFetch(() => json(report()));
+    stubFetch((url) =>
+      url.startsWith("/api/stations") ? json({ enabled: false, stations: [] }) : json(report()),
+    );
     const scroll = vi.spyOn(Element.prototype, "scrollIntoView");
     localStorage.setItem("aqa:place:v1", JSON.stringify(PLACE));
     const user = userEvent.setup();

@@ -17,6 +17,7 @@ describe("Tamil", () => {
     const requests: PlanRequest[] = [];
     stubFetch((url, init) => {
       if (url.startsWith("/api/air")) return json(report());
+      if (url.startsWith("/api/stations")) return json({ enabled: false, stations: [] });
       const request = bodyOf(init) as PlanRequest;
       requests.push(request);
       return json({ source: "fallback", data: planFallback(request), notice: "ai-off" });

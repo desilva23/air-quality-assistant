@@ -8,7 +8,7 @@ import type { CommuteMode, Mask } from "./household";
  * Share of PM2.5 a mask keeps out as people typically wear it. Below the lab
  * ratings (95% for an N95) because of gaps at the edges.
  */
-const MASK_PROTECTION: Record<Mask, number> = {
+export const MASK_PROTECTION: Record<Mask, number> = {
   none: 0,
   cloth: 0.15,
   surgical: 0.35,

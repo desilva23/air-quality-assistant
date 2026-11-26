@@ -4,12 +4,13 @@ import { POST as ask } from "@/app/api/ask/route";
 import { GET as health } from "@/app/api/health/route";
 import { GET as places } from "@/app/api/places/route";
 import { POST as plan } from "@/app/api/plan/route";
-import { airReport } from "@/lib/air/report";
+import { GET as stations } from "@/app/api/stations/route";
+import { airReport, stationsNear } from "@/lib/air/report";
 import { searchPlaces } from "@/lib/air/open-meteo";
 import { groqKey, openAqKey } from "@/lib/server/config";
 import { planRequest, report } from "../support/fixtures";
 
-vi.mock("@/lib/air/report", () => ({ airReport: vi.fn() }));
+vi.mock("@/lib/air/report", () => ({ airReport: vi.fn(), stationsNear: vi.fn() }));
 vi.mock("@/lib/air/open-meteo", () => ({ searchPlaces: vi.fn() }));
 
 const post = (path: string, body: unknown) =>
@@ -38,6 +39,15 @@ describe("API routes", () => {
     const response = await air(new Request("http://localhost/api/air?lat=28.6139&lon=77.209"));
     expect(response.status).toBe(200);
     expect(airReport).toHaveBeenCalledWith({ latitude: 28.61, longitude: 77.21 });
+  });
+
+  it("serves nearby stations for rounded coordinates", async () => {
+    vi.mocked(stationsNear).mockResolvedValue({ enabled: true, stations: [] });
+    const response = await stations(
+      new Request("http://localhost/api/stations?lat=13.0827&lon=80.2707"),
+    );
+    expect(await response.json()).toEqual({ enabled: true, stations: [] });
+    expect(stationsNear).toHaveBeenCalledWith({ latitude: 13.08, longitude: 80.27 });
   });
 
   it("searches places", async () => {

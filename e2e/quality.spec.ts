@@ -9,6 +9,12 @@ for (const colorScheme of ["light", "dark"] as const) {
     await page.getByRole("button", { name: "Build today's plan" }).click();
     await expect(page.getByRole("heading", { level: 3 })).toBeVisible();
     await page.getByText("Show the hourly values as a table").click();
+    await expect(
+      page.locator(".station-map .leaflet-container, .station-map.leaflet-container"),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Every way to make your commute" }),
+    ).toBeVisible();
     expect(await axeViolations(page)).toEqual([]);
   });
 }

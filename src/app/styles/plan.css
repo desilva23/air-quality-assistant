@@ -146,3 +146,127 @@
 .answer {
   margin-top: 1rem;
 }
+
+/* The extra panels: stations map, the what-if and every way to commute. */
+
+@media (min-width: 960px) {
+  .stations-card {
+    grid-column: 1;
+  }
+
+  .choices-card {
+    grid-column: 2;
+  }
+}
+
+.station-map {
+  height: 320px;
+  border-radius: var(--r-item);
+  overflow: hidden;
+  margin: 0.5rem 0 1rem;
+  background: var(--card-2);
+}
+
+/* OpenStreetMap has no dark tiles, so dark mode dims them; the dots keep their colours. */
+@media (prefers-color-scheme: dark) {
+  .station-map .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+  }
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  vertical-align: -1px;
+}
+
+.range-value {
+  font-weight: 700;
+  color: var(--metro);
+}
+
+.choices-card input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--metro);
+}
+
+.dose {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  margin-top: 0.5rem;
+}
+
+.dose-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dose-bars li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) 1fr 2.5rem;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.92rem;
+}
+
+.dose-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--card-2);
+  overflow: hidden;
+}
+
+.dose-fill {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--chart-bar);
+}
+
+.dose-bars .chosen .dose-fill {
+  background: var(--metro);
+}
+
+.dose-value {
+  font-weight: 700;
+  text-align: right;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.modes th[scope="row"] span {
+  color: var(--metro);
+  font-weight: 700;
+}
+
+.modes tr.yours {
+  background: var(--card-2);
+}
+
+.co2-bar {
+  display: inline-block;
+  width: 4.5rem;
+  height: 8px;
+  margin-right: 0.5rem;
+  border-radius: 4px;
+  background: var(--card-2);
+  vertical-align: 1px;
+  overflow: hidden;
+}
+
+.co2-bar span {
+  display: block;
+  height: 100%;
+  background: var(--metro);
+}

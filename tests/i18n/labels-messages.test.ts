@@ -49,8 +49,16 @@ describe("messages", () => {
         m.chart.cleanest("3:00 PM"),
         m.chart.summary(24, 40, 180),
         m.plan.partForecast("Poor", 110),
+        m.stations.intro(7),
+        m.stations.km(3.2),
+        m.choices.intro(164),
+        m.choices.result(5.4, "1,484"),
+        m.choices.cut(38),
+        m.commute.trip(15, 5),
       ];
-      expect(filled.join(" ")).toMatch(/Chennai.*Alandur.*2:00 PM.*6\.1.*4\.2.*180.*110/s);
+      expect(filled.join(" ")).toMatch(
+        /Chennai.*Alandur.*2:00 PM.*6\.1.*4\.2.*180.*110.*7.*3\.2.*164.*5\.4.*1,484.*38.*15/s,
+      );
       if (language === "ta") for (const text of filled) expect(text).toMatch(TAMIL);
     }
   });

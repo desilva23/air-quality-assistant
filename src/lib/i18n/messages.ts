@@ -131,6 +131,45 @@ const ENGLISH_MESSAGES = {
     copied: "Copied. Paste it into your family or society group.",
     copyFailed: "Copying isn't allowed here. Select the text above and copy it.",
   },
+  stations: {
+    heading: "Stations near you",
+    intro: (count: number) =>
+      `The ${String(count)} nearest monitoring stations that reported in the last ${String(STATION_MAX_AGE_HOURS)} hours, coloured by AQI band. The dark blue dot is you.`,
+    map: "Map of nearby monitoring stations. The same stations are listed in the table below it.",
+    loading: "Finding nearby stations…",
+    table: "Nearby stations, as a table",
+    none: `No monitoring station within ${String(STATION_RADIUS_KM)} km reported in the last ${String(STATION_MAX_AGE_HOURS)} hours.`,
+    off: "Station readings aren't set up on this server.",
+    station: "Station",
+    distance: "Distance",
+    band: "Band",
+    km: (km: number) => `${String(km)} km`,
+  },
+  choices: {
+    heading: "What changes if…",
+    intro: (pm25: number) =>
+      `Today's PM2.5 is ${String(pm25)} µg/m³. Change the choices to see your day's dose.`,
+    minutes: "Time outdoors today",
+    result: (cigarettes: number, micrograms: string) =>
+      `About ${String(cigarettes)} cigarettes' worth of PM2.5 (${micrograms} µg breathed in today).`,
+    asSet: "With these choices",
+    baseline: "No mask, no purifier",
+    cut: (percent: number) => `These choices cut your dose by ${String(percent)}%.`,
+  },
+  commute: {
+    heading: "Every way to make your commute",
+    trip: (km: number, days: number) =>
+      `${String(km)} km each way, ${String(days)} days a week. CO₂ and petrol from India GHG Program factors.`,
+    sample: "You haven't set a commute, so this shows a 10 km trip, 5 days a week.",
+    mode: "Travel by",
+    co2: "CO₂ a week",
+    petrol: "Petrol a week",
+    time: "On the road a day",
+    streetAir: "Breathes street air",
+    yes: "Yes",
+    no: "No",
+    yours: "(yours)",
+  },
   ask: {
     heading: "Ask about today",
     question: "Your question",

@@ -31,6 +31,12 @@ export const test = base.extend<{ pageErrors: string[] }>({
 
 export { expect };
 
+/** A 1×1 transparent PNG. */
+const BLANK_TILE = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
+
 /**
  * Live air depends on outside services, so browser tests answer the two data
  * endpoints with fixed data. The plan and question endpoints run for real,
@@ -39,6 +45,35 @@ export { expect };
 export async function stubAirData(page: Page): Promise<void> {
   await page.route("**/api/air?*", (route) =>
     route.fulfill({ json: report({ outlook: outlookFrom(DAY_VALUES) }) }),
+  );
+  await page.route("**/api/stations?*", (route) =>
+    route.fulfill({
+      json: {
+        enabled: true,
+        stations: [
+          {
+            name: "ITO, Delhi - CPCB",
+            latitude: 28.63,
+            longitude: 77.24,
+            distanceKm: 3.2,
+            pm25: 182,
+            measuredAt: "2026-11-25T18:15:00Z",
+          },
+          {
+            name: "Lodhi Road, Delhi - IMD",
+            latitude: 28.59,
+            longitude: 77.22,
+            distanceKm: 2.4,
+            pm25: 108,
+            measuredAt: "2026-11-25T18:00:00Z",
+          },
+        ],
+      },
+    }),
+  );
+  // Map tiles come from OpenStreetMap; tests serve a blank tile so they never depend on it.
+  await page.route("https://tile.openstreetmap.org/**", (route) =>
+    route.fulfill({ contentType: "image/png", body: BLANK_TILE }),
   );
   await page.route("**/api/places?*", (route) =>
     route.fulfill({

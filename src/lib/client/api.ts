@@ -8,7 +8,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { z } from "zod";
 import { AirReportSchema, type AirReport } from "../domain/air";
 import { roundCoordinate, type Coordinates } from "../domain/geo";
-import { PlacesReplySchema, type PlacesQuery, type PlacesReply } from "../air/contracts";
+import {
+  PlacesReplySchema,
+  StationsReplySchema,
+  type PlacesQuery,
+  type PlacesReply,
+  type StationsReply,
+} from "../air/contracts";
 import {
   AnswerEnvelopeSchema,
   PlanEnvelopeSchema,
@@ -98,6 +104,18 @@ export function fetchAir(point: Coordinates, options?: RequestOptions): Promise<
   });
   const path = `/api/air?${params.toString()}`;
   return request({ path, schema: AirReportSchema, timeoutMs: DATA_TIMEOUT_MS }, options);
+}
+
+export function fetchStations(
+  point: Coordinates,
+  options?: RequestOptions,
+): Promise<StationsReply> {
+  const params = new URLSearchParams({
+    lat: String(roundCoordinate(point.latitude)),
+    lon: String(roundCoordinate(point.longitude)),
+  });
+  const path = `/api/stations?${params.toString()}`;
+  return request({ path, schema: StationsReplySchema, timeoutMs: DATA_TIMEOUT_MS }, options);
 }
 
 export function requestPlan(

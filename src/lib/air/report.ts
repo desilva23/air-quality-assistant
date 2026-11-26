@@ -1,10 +1,11 @@
 import "server-only";
 import type { AirNote, AirReport, Reading } from "../domain/air";
+import type { StationsReply } from "./contracts";
 import type { Coordinates } from "../domain/geo";
 import { openAqKey } from "../server/config";
 import { UpstreamError } from "./fetch-json";
 import { modelAir, MODEL_SOURCE, type ModelAir } from "./open-meteo";
-import { stationReading } from "./openaq";
+import { nearbyStations, stationReading } from "./openaq";
 
 type Outcome<T> = PromiseSettledResult<T>;
 
@@ -46,4 +47,12 @@ export async function airReport(point: Coordinates, now: number = Date.now()): P
     ...forecastFrom(modelled),
     note: noteFor(key ? station : null),
   };
+}
+
+/** The stations around a point for the map, or none when station readings are off. */
+export async function stationsNear(point: Coordinates): Promise<StationsReply> {
+  const key = openAqKey();
+  return key
+    ? { enabled: true, stations: await nearbyStations(point, key) }
+    : { enabled: false, stations: [] };
 }

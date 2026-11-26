@@ -1,5 +1,6 @@
 "use client";
 
+import { lazy, Suspense } from "react";
 import { AirSection } from "./AirSection";
 import { AskSection } from "./AskSection";
 import { HouseholdForm } from "./HouseholdForm";
@@ -11,6 +12,9 @@ import { SampleProfiles } from "./SampleProfiles";
 import { Intro, SiteFooter, SiteHeader, SkyBand } from "./SiteFrame";
 import { SkyReading } from "./SkyReading";
 import { useAssistant } from "./use-assistant";
+
+// Below the plan, so their code (the map included) loads only once there is air to show.
+const ExtraPanels = lazy(() => import("./ExtraPanels").then((m) => ({ default: m.ExtraPanels })));
 
 export interface AssistantAppProps {
   aiEnabled: boolean;
@@ -76,6 +80,11 @@ export function AssistantApp({ aiEnabled }: AssistantAppProps) {
                 <HouseholdForm value={household} onChange={setHousehold} />
               </section>
               <PlanSection request={request} />
+              {place && report && (
+                <Suspense fallback={null}>
+                  <ExtraPanels place={place} report={report} household={household} />
+                </Suspense>
+              )}
               {request && <AskSection context={request} />}
             </div>
           </main>

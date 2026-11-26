@@ -8,6 +8,7 @@ import {
   MAX_CONCENTRATION,
   STATION_MAX_AGE_HOURS,
   STATION_RADIUS_KM,
+  type NearbyStation,
   type Reading,
 } from "../domain/air";
 import { distanceKm, type Coordinates } from "../domain/geo";
@@ -47,12 +48,41 @@ const isFresh = (utc: string, now: number): boolean =>
 /** Plausible concentrations only; networks sometimes report placeholders like -999. */
 const plausible = (value: number): boolean => value >= 0 && value <= MAX_CONCENTRATION;
 
-function nearestFresh(locations: Location[], point: Coordinates, now: number) {
+interface Nearby {
+  location: Location;
+  km: number;
+}
+
+/** Stations that reported recently, nearest first. */
+function freshByDistance(locations: Location[], point: Coordinates, now: number): Nearby[] {
   return locations
     .filter((location) => location.datetimeLast && isFresh(location.datetimeLast.utc, now))
     .map((location) => ({ location, km: distanceKm(point, location.coordinates) }))
-    .sort((a, b) => a.km - b.km)[0];
+    .sort((a, b) => a.km - b.km);
 }
+
+interface Options {
+  source: string;
+  headers: Record<string, string>;
+}
+
+/** Every PM2.5 station within range of the point. */
+async function searchNear(point: Coordinates, options: Options): Promise<Location[]> {
+  const search = urlWith(`${BASE_URL}/locations`, {
+    coordinates: `${String(point.latitude)},${String(point.longitude)}`,
+    radius: String(STATION_RADIUS_KM * 1000),
+    parameters_id: PM25_PARAMETER_ID,
+    limit: "20",
+  });
+  return (await fetchJson(search, LocationsReplySchema, options)).results;
+}
+
+async function latestAt(location: Location, options: Options): Promise<Latest> {
+  const url = new URL(`${BASE_URL}/locations/${String(location.id)}/latest`);
+  return (await fetchJson(url, LatestReplySchema, options)).results;
+}
+
+const kmRounded = (km: number): number => Math.round(km * 10) / 10;
 
 /** The latest fresh, plausible value of `parameter` at this location, if any. */
 function latestValue(location: Location, latest: Latest, parameter: string, now: number) {
@@ -74,21 +104,10 @@ export async function stationReading(
   now: number = Date.now(),
 ): Promise<Reading | null> {
   const options = { source: "OpenAQ", headers: { "X-API-Key": apiKey } };
-  const search = urlWith(`${BASE_URL}/locations`, {
-    coordinates: `${String(point.latitude)},${String(point.longitude)}`,
-    radius: String(STATION_RADIUS_KM * 1000),
-    parameters_id: PM25_PARAMETER_ID,
-    limit: "20",
-  });
-  const nearest = nearestFresh(
-    (await fetchJson(search, LocationsReplySchema, options)).results,
-    point,
-    now,
-  );
+  const [nearest] = freshByDistance(await searchNear(point, options), point, now);
   if (!nearest) return null;
   const { location, km } = nearest;
-  const latestUrl = new URL(`${BASE_URL}/locations/${String(location.id)}/latest`);
-  const { results } = await fetchJson(latestUrl, LatestReplySchema, options);
+  const results = await latestAt(location, options);
   const pm25 = latestValue(location, results, "pm25", now);
   if (!pm25) return null;
   return {
@@ -98,6 +117,40 @@ export async function stationReading(
     kind: "station",
     source: `OpenAQ (${location.provider?.name.slice(0, 50) ?? "monitoring network"})`,
     station: location.name?.slice(0, 120) ?? null,
-    distanceKm: Math.round(km * 10) / 10,
+    distanceKm: kmRounded(km),
   };
+}
+
+/** Stations drawn on the map: the nearest that reported recently, each with its latest PM2.5. */
+export const MAP_STATIONS = 8;
+
+/**
+ * The nearest fresh stations with their latest PM2.5, for the map. Their
+ * readings are fetched in parallel; a station whose reading fails is left out.
+ */
+export async function nearbyStations(
+  point: Coordinates,
+  apiKey: string,
+  now: number = Date.now(),
+): Promise<NearbyStation[]> {
+  const options = { source: "OpenAQ", headers: { "X-API-Key": apiKey } };
+  const nearest = freshByDistance(await searchNear(point, options), point, now);
+  const readings = await Promise.allSettled(
+    nearest.slice(0, MAP_STATIONS).map(async ({ location, km }) => {
+      const pm25 = latestValue(location, await latestAt(location, options), "pm25", now);
+      return pm25
+        ? {
+            name: location.name?.slice(0, 120) ?? "",
+            latitude: location.coordinates.latitude,
+            longitude: location.coordinates.longitude,
+            distanceKm: kmRounded(km),
+            pm25: pm25.value,
+            measuredAt: pm25.datetime.utc,
+          }
+        : null;
+    }),
+  );
+  return readings.flatMap((result) =>
+    result.status === "fulfilled" && result.value ? [result.value] : [],
+  );
 }

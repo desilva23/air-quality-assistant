@@ -4,6 +4,7 @@ import {
   ApiError,
   askQuestion,
   fetchAir,
+  fetchStations,
   requestPlan,
   searchPlaces,
   useApiCall,
@@ -29,6 +30,14 @@ describe("endpoint functions", () => {
       fetchAir({ latitude: 28.61394, longitude: 77.20902 }, { fetcher }),
     ).resolves.toEqual(report());
     expect(fetcher.mock.calls[0]?.[0]).toBe("/api/air?lat=28.61&lon=77.21");
+  });
+
+  it("ask for nearby stations at rounded coordinates", async () => {
+    const fetcher = fetcherReturning(json({ enabled: true, stations: [] }));
+    await expect(
+      fetchStations({ latitude: 13.0827, longitude: 80.2707 }, { fetcher }),
+    ).resolves.toEqual({ enabled: true, stations: [] });
+    expect(fetcher.mock.calls[0]?.[0]).toBe("/api/stations?lat=13.08&lon=80.27");
   });
 
   it("post plan requests and questions as JSON", async () => {

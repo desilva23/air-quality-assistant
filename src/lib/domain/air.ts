@@ -56,6 +56,17 @@ export const AirReportSchema = z.object({
   note: z.enum(AIR_NOTES).nullable(),
 });
 
+/** A monitoring station near the chosen place, with its latest PM2.5, for the map. */
+export const NearbyStationSchema = z.object({
+  name: z.string().max(120),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  distanceKm: z.number().min(0).max(100),
+  pm25: Concentration,
+  measuredAt: Timestamp,
+});
+
+export type NearbyStation = z.infer<typeof NearbyStationSchema>;
 export type Place = z.infer<typeof PlaceSchema>;
 export type Reading = z.infer<typeof ReadingSchema>;
 export type OutlookHour = z.infer<typeof OutlookHourSchema>;

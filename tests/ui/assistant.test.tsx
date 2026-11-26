@@ -16,6 +16,7 @@ function stubApi() {
       });
     }
     if (url.startsWith("/api/air")) return json(report());
+    if (url.startsWith("/api/stations")) return json({ enabled: false, stations: [] });
     if (url === "/api/plan") {
       const request = bodyOf(init) as PlanRequest;
       return json({
@@ -97,9 +98,11 @@ describe("AssistantApp", () => {
   });
 
   it("shows when a plan request fails", async () => {
-    stubFetch((url) =>
-      url.startsWith("/api/air") ? json(report()) : json({ error: "RATE_LIMITED" }, 429),
-    );
+    stubFetch((url) => {
+      if (url.startsWith("/api/air")) return json(report());
+      if (url.startsWith("/api/stations")) return json({ enabled: false, stations: [] });
+      return json({ error: "RATE_LIMITED" }, 429);
+    });
     const user = userEvent.setup();
     render(<AssistantApp aiEnabled={false} />);
     await user.click(screen.getByRole("button", { name: /Kolkata seniors/ }));

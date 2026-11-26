@@ -10,6 +10,7 @@ describe("Content-Security-Policy", () => {
     expect(policy).toContain("style-src 'self' 'nonce-abc'");
     expect(policy).toContain("connect-src 'self';");
     expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).toContain("img-src 'self' data: https://tile.openstreetmap.org");
     expect(policy).not.toContain("unsafe");
   });
 
