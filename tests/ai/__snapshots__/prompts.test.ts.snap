@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`prompts > gives the model the household's real situation and the computed impacts 1`] = `
+"Place: <user_input>New Delhi, Delhi</user_input>
+Right now: indicative AQI 323 (Very poor), set by PM2.5. PM2.5 150 µg/m³, PM10 220 µg/m³. Source: OpenAQ (CPCB), measured at ITO, Delhi, 3.2 km away, at 12:00 am IST.
+What this category means: Respiratory illness on prolonged exposure.
+Forecast PM2.5 for the coming day: Morning: 198 µg/m³ (Very poor); Afternoon: 84 µg/m³ (Moderate); Evening: 200 µg/m³ (Very poor)
+
+Household:
+- Most sensitive: young children
+- Commute: Car, 15 km each way, 5 days a week
+- Outdoor routine: Children's outdoor play, 60 minutes, usually in the evening
+- Home: no air purifier; cooks with LPG or piped gas; no smokers
+- Mask: No mask
+
+Impact facts (cite by id):
+- shift-activity: Moving your 60-minute children's outdoor play from 6:00 pm to 2:00 pm cuts the PM2.5 you breathe during it by about 67% (forecast 70 vs 210 µg/m³).
+- move-indoors: Doing the children's outdoor play indoors instead cuts that dose by about 30%, and more with a purifier running.
+- mask: A well-fitted N95 instead of no mask cuts what you breathe in during your 60 minutes outdoors by about 75%.
+- purifier: A purifier sized for the bedroom, with windows shut, could keep indoor PM2.5 near 45 instead of about 105 µg/m³ at today's outdoor level.
+- ventilate: Air the home for 10–15 minutes around 2:00 pm, the cleanest hour forecast (70 µg/m³, against a peak of 250 at 7:00 am).
+- commute-switch: Taking the metro or a bus instead of your car for 15 km each way saves about 19 kg of CO₂ a week.
+- carpool: Sharing the car with two others cuts your share of its CO₂ by about 14 kg a week.
+- remote-day: One day a week at home instead of commuting saves 82 minutes on the road and about 4.2 kg of CO₂.
+
+Write today's plan for this household."
+`;

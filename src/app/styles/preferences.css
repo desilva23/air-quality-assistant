@@ -1,0 +1,50 @@
+/* User preferences: less motion, more contrast, and Windows high-contrast mode. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --muted: var(--text);
+    --border: var(--text);
+    --chart-bar: var(--muted);
+  }
+
+  .aqi-scale li {
+    opacity: 1;
+    outline: 1px solid var(--text);
+  }
+}
+
+@media (forced-colors: active) {
+  .bar,
+  .aqi-scale li {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .bars li.best .bar,
+  .aqi-scale li.current {
+    background: Highlight;
+  }
+
+  .aqi {
+    border-left-color: CanvasText;
+  }
+
+  .button,
+  .chip,
+  .sample,
+  .ai-status,
+  .source-note,
+  .note {
+    border: 1px solid ButtonText;
+  }
+}

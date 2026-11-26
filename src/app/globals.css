@@ -1,0 +1,8 @@
+/* The app's styles, one file per part of the interface, in cascade order. */
+
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/forms.css";
+@import "./styles/air.css";
+@import "./styles/plan.css";
+@import "./styles/preferences.css";

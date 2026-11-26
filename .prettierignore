@@ -1,0 +1,7 @@
+# Formatting is for code. Prose, lockfiles and generated output are left alone.
+*.md
+package-lock.json
+next-env.d.ts
+coverage/
+playwright-report/
+test-results/

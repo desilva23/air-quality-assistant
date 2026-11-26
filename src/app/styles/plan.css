@@ -1,0 +1,79 @@
+/* Today's plan, its impacts, sharing, and answers. */
+
+.plan {
+  margin-top: 1.25rem;
+}
+
+.source-note {
+  font-size: 0.875rem;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+}
+
+.source-note.ai {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.source-note.fallback {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.routine {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.plan-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.plan-items li {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  background: var(--surface-2);
+}
+
+.action {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.why {
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.impact {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.6rem;
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  font-size: 0.925rem;
+}
+
+.impact-label {
+  font-weight: 700;
+}
+
+.share-text {
+  white-space: pre-line;
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.answer:empty {
+  display: none;
+}
+
+.answer {
+  margin-top: 1rem;
+}

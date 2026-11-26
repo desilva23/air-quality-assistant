@@ -1,0 +1,239 @@
+/* The current index, its sources, and the hourly forecast chart. */
+
+.aqi {
+  border-left: 8px solid var(--band);
+  padding-left: 1rem;
+  margin-bottom: 1rem;
+}
+
+.aqi-good {
+  --band: var(--aqi-good);
+}
+.aqi-satisfactory {
+  --band: var(--aqi-satisfactory);
+}
+.aqi-moderate {
+  --band: var(--aqi-moderate);
+}
+.aqi-poor {
+  --band: var(--aqi-poor);
+}
+.aqi-very-poor {
+  --band: var(--aqi-very-poor);
+}
+.aqi-severe {
+  --band: var(--aqi-severe);
+}
+
+.aqi-headline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.aqi-number {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.aqi-label {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.aqi-scale {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0.5rem;
+  max-width: 20rem;
+}
+
+.aqi-scale li {
+  height: 8px;
+  border-radius: 4px;
+  opacity: 0.35;
+}
+
+.aqi-scale li.current {
+  opacity: 1;
+  height: 12px;
+  margin-top: -2px;
+}
+
+.band-good {
+  background: var(--aqi-good);
+}
+.band-satisfactory {
+  background: var(--aqi-satisfactory);
+}
+.band-moderate {
+  background: var(--aqi-moderate);
+}
+.band-poor {
+  background: var(--aqi-poor);
+}
+.band-very-poor {
+  background: var(--aqi-very-poor);
+}
+.band-severe {
+  background: var(--aqi-severe);
+}
+
+.health {
+  font-weight: 600;
+}
+
+.readings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.readings dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.readings dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.outlook {
+  margin: 1.25rem 0 0;
+}
+
+.outlook figcaption {
+  margin-bottom: 0.25rem;
+}
+
+.outlook-readout {
+  min-height: 1.6em;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.outlook-plot {
+  position: relative;
+  height: 160px;
+  margin-left: 2.25rem;
+  border-bottom: 1px solid var(--muted);
+}
+
+.gridline,
+.limit {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--chart-grid);
+}
+
+.gridline span {
+  position: absolute;
+  right: 100%;
+  margin-right: 0.4rem;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.limit {
+  border-top: 1px solid var(--chart-limit);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.limit span {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  font-size: 0.75rem;
+  color: var(--text);
+  background: var(--surface);
+  padding: 0 0.25rem;
+}
+
+.bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bars li {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1px;
+}
+
+.bar {
+  display: block;
+  width: 100%;
+  max-width: 18px;
+  background: var(--chart-bar);
+  border-radius: 4px 4px 0 0;
+}
+
+.bars li.best .bar {
+  background: var(--chart-best);
+}
+
+.bars li:hover .bar {
+  filter: brightness(1.15);
+}
+
+.outlook-axis {
+  display: flex;
+  list-style: none;
+  margin: 0.25rem 0 0 2.25rem;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.outlook-axis li {
+  flex: 1;
+  white-space: nowrap;
+  overflow: visible;
+  width: 0;
+}
+
+.outlook-table {
+  margin-top: 0.75rem;
+}
+
+.outlook-table summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}

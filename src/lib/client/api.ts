@@ -1,0 +1,175 @@
+"use client";
+
+// The only way the browser talks to the API. Each endpoint gets one typed
+// function: a wrong request fails to compile, and a reply that doesn't match
+// the endpoint's schema is rejected here as well as checked on the server.
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { z } from "zod";
+import { AirReportSchema, type AirReport } from "../domain/air";
+import { roundCoordinate, type Coordinates } from "../domain/geo";
+import { PlacesReplySchema, type PlacesQuery, type PlacesReply } from "../air/contracts";
+import {
+  AnswerEnvelopeSchema,
+  PlanEnvelopeSchema,
+  type AiEnvelope,
+  type Answer,
+  type AskRequest,
+  type PlanReply,
+  type PlanRequest,
+} from "../ai/contracts";
+import { API_ERROR_MESSAGES, ApiErrorBodySchema, type ApiErrorCode } from "../api-errors";
+
+/** Data lookups answer within seconds; AI calls get a little longer than the server's model timeout. */
+const DATA_TIMEOUT_MS = 15_000;
+const AI_TIMEOUT_MS = 35_000;
+
+export class ApiError extends Error {
+  readonly code: ApiErrorCode;
+
+  constructor(code: ApiErrorCode) {
+    super(API_ERROR_MESSAGES[code]);
+    this.name = "ApiError";
+    this.code = code;
+  }
+}
+
+export interface RequestOptions {
+  /** Aborts the request when the caller no longer needs it. */
+  signal?: AbortSignal;
+  /** Injected by tests; the global fetch otherwise. */
+  fetcher?: typeof fetch;
+}
+
+function failureCode(error: unknown, signal: AbortSignal | undefined): ApiErrorCode {
+  if (error instanceof ApiError) return error.code;
+  if (error instanceof DOMException && error.name === "TimeoutError") return "TIMEOUT";
+  if (signal?.aborted) return "CANCELLED";
+  return "NETWORK";
+}
+
+interface Call<S extends z.ZodType> {
+  path: string;
+  schema: S;
+  timeoutMs: number;
+  /** A JSON body makes this a POST; without one it is a GET. */
+  body?: unknown;
+}
+
+async function request<S extends z.ZodType>(
+  { path, schema, timeoutMs, body }: Call<S>,
+  { signal, fetcher = fetch }: RequestOptions = {},
+): Promise<z.infer<S>> {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  try {
+    const response = await fetcher(path, {
+      ...(body !== undefined && {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    });
+    const data: unknown = await response.json().catch(() => null);
+    if (!response.ok) {
+      const failure = ApiErrorBodySchema.safeParse(data);
+      throw new ApiError(failure.success ? failure.data.error : "INTERNAL");
+    }
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) throw new ApiError("RESPONSE_INVALID");
+    return parsed.data;
+  } catch (error) {
+    throw new ApiError(failureCode(error, signal));
+  }
+}
+
+// --- Endpoints: one function per route, typed by its own schemas ------------
+
+export function searchPlaces(query: PlacesQuery, options?: RequestOptions): Promise<PlacesReply> {
+  const path = `/api/places?${new URLSearchParams({ q: query.q }).toString()}`;
+  return request({ path, schema: PlacesReplySchema, timeoutMs: DATA_TIMEOUT_MS }, options);
+}
+
+export function fetchAir(point: Coordinates, options?: RequestOptions): Promise<AirReport> {
+  const params = new URLSearchParams({
+    lat: String(roundCoordinate(point.latitude)),
+    lon: String(roundCoordinate(point.longitude)),
+  });
+  const path = `/api/air?${params.toString()}`;
+  return request({ path, schema: AirReportSchema, timeoutMs: DATA_TIMEOUT_MS }, options);
+}
+
+export function requestPlan(
+  input: PlanRequest,
+  options?: RequestOptions,
+): Promise<AiEnvelope<PlanReply>> {
+  return request(
+    { path: "/api/plan", schema: PlanEnvelopeSchema, timeoutMs: AI_TIMEOUT_MS, body: input },
+    options,
+  );
+}
+
+export function askQuestion(
+  input: AskRequest,
+  options?: RequestOptions,
+): Promise<AiEnvelope<Answer>> {
+  return request(
+    { path: "/api/ask", schema: AnswerEnvelopeSchema, timeoutMs: AI_TIMEOUT_MS, body: input },
+    options,
+  );
+}
+
+// --- Calling an endpoint from a component -----------------------------------
+
+interface CallState<O> {
+  status: "idle" | "loading" | "done" | "error";
+  data?: O;
+  error?: string;
+}
+
+/**
+ * Runs one endpoint function with loading and error state. A new run cancels
+ * the one in flight, and unmounting cancels it too, so a slow old answer can
+ * never overwrite a newer one. The last good result survives a failed retry.
+ * Pass a module-level endpoint function, so `run` stays stable.
+ */
+export function useApiCall<I, O>(call: (input: I, options: RequestOptions) => Promise<O>) {
+  const [state, setState] = useState<CallState<O>>({ status: "idle" });
+  const inFlight = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const pending = inFlight;
+    return () => {
+      pending.current?.abort();
+    };
+  }, []);
+
+  const run = useCallback(
+    async (input: I): Promise<O | null> => {
+      inFlight.current?.abort();
+      const controller = new AbortController();
+      inFlight.current = controller;
+      setState((previous) => ({ status: "loading", data: previous.data }));
+      try {
+        const data = await call(input, { signal: controller.signal });
+        setState({ status: "done", data });
+        return data;
+      } catch (error) {
+        const code = error instanceof ApiError ? error.code : "INTERNAL";
+        if (code !== "CANCELLED") {
+          const message = API_ERROR_MESSAGES[code];
+          setState((previous) => ({ status: "error", error: message, data: previous.data }));
+        }
+        return null;
+      }
+    },
+    [call],
+  );
+
+  const reset = useCallback(() => {
+    inFlight.current?.abort();
+    setState({ status: "idle" });
+  }, []);
+
+  return { ...state, loading: state.status === "loading", run, reset };
+}
