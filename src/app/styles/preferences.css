@@ -39,6 +39,11 @@
     border-left-color: CanvasText;
   }
 
+  .hero,
+  .hero-points li {
+    border: 1px solid CanvasText;
+  }
+
   .button,
   .chip,
   .sample,

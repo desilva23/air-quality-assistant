@@ -8,6 +8,8 @@ test.use({ viewport: { width: 1000, height: 900 } });
 test("screenshots for the README", async ({ page }) => {
   await openDelhiFamily(page);
   await page.getByRole("heading", { name: "2. Air in New Delhi now" }).scrollIntoViewIfNeeded();
+  // Keep the pointer off the chart, so the readout shows the cleanest hour.
+  await page.mouse.move(0, 0);
   await page
     .locator("section")
     .nth(1)

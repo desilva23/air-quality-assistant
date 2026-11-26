@@ -14,7 +14,7 @@ test("a family gets live air, a personal plan with impacts, and an answer", asyn
   await expect(headline).toBeFocused();
   await expect(page.getByText(/AI isn't switched on for this server/)).toBeVisible();
   await expect(page.getByText(/cuts the PM2.5 you breathe during it by about 67%/)).toBeVisible();
-  await expect(page.getByText(/saves about 19 kg of CO₂ a week/)).toBeVisible();
+  await expect(page.getByText(/saves about 19 kg of CO₂ and ₹880 of petrol a week/)).toBeVisible();
 
   await page.getByRole("button", { name: "Can my kids play outside this evening?" }).click();
   await page.getByRole("button", { name: "Ask" }).click();

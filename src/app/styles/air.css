@@ -2,8 +2,14 @@
 
 .aqi {
   border-left: 8px solid var(--band);
-  padding-left: 1rem;
+  background: color-mix(in srgb, var(--band) 12%, var(--surface));
+  border-radius: var(--radius);
+  padding: 1rem 1rem 0.5rem;
   margin-bottom: 1rem;
+}
+
+.who {
+  margin-top: -0.25rem;
 }
 
 .aqi-good {

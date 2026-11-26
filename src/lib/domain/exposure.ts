@@ -35,6 +35,14 @@ const SPEED_KMH: Record<Exclude<CommuteMode, "none">, number> = {
  */
 const PM25_PER_CIGARETTE = 22;
 
+/** WHO's 2021 air quality guideline for the 24-hour mean of PM2.5, µg/m³. */
+export const WHO_PM25_DAILY = 15;
+
+/** How many times the WHO 24-hour guideline this PM2.5 level is, to one decimal place. */
+export function whoMultiple(pm25: number): number {
+  return Math.round((pm25 / WHO_PM25_DAILY) * 10) / 10;
+}
+
 /** Minutes a day spent commuting, both ways. */
 export function commuteMinutes(mode: CommuteMode, oneWayKm: number): number {
   if (mode === "none") return 0;

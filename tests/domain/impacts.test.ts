@@ -32,11 +32,13 @@ describe("impact facts for the Delhi family", () => {
       "around 2:00 pm, the cleanest hour forecast (70 µg/m³, against a peak of 250 at 7:00 am)",
     );
     expect(textOf(facts, "commute-switch")).toBe(
-      "Taking the metro or a bus instead of your car for 15 km each way saves about 19 kg of CO₂ a week.",
+      "Taking the metro or a bus instead of your car for 15 km each way saves about 19 kg of CO₂ and ₹880 of petrol a week.",
     );
-    expect(textOf(facts, "carpool")).toContain("about 14 kg a week");
+    expect(textOf(facts, "carpool")).toBe(
+      "Sharing the car with two others cuts your share of its CO₂ by about 14 kg a week, and your petrol bill by about ₹590 if you split the cost.",
+    );
     expect(textOf(facts, "remote-day")).toBe(
-      "One day a week at home instead of commuting saves 82 minutes on the road and about 4.2 kg of CO₂.",
+      "One day a week at home instead of commuting saves 82 minutes on the road, about 4.2 kg of CO₂ and ₹180 of petrol.",
     );
   });
 });
@@ -78,6 +80,10 @@ describe("impact facts that don't apply", () => {
     const walk = { ...FAMILY, commute: { mode: "walk" as const, distanceKm: 2, daysPerWeek: 5 } };
     expect(textOf(impactFacts(walk, report()), "remote-day")).toBe(
       "One day a week at home instead of commuting saves 48 minutes on the road.",
+    );
+    const auto = { ...FAMILY, commute: { mode: "auto" as const, distanceKm: 8, daysPerWeek: 5 } };
+    expect(textOf(impactFacts(auto, report()), "commute-switch")).toBe(
+      "Taking the metro or a bus instead of your auto-rickshaw for 8 km each way saves about 7.4 kg of CO₂ a week.",
     );
     const idleCar = {
       ...FAMILY,

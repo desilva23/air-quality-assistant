@@ -3,7 +3,14 @@
 
 import { z } from "../zod";
 import type { AirReport } from "./air";
-import { commuteKgPerDay, formatKg, weeklySavingKg } from "./emissions";
+import {
+  commuteKgPerDay,
+  formatKg,
+  formatRupees,
+  isPetrolVehicle,
+  petrolRupees,
+  weeklySavingKg,
+} from "./emissions";
 import {
   commuteMinutes,
   INDOOR_SHARE,
@@ -62,6 +69,14 @@ const VEHICLE_NOUN: Partial<Record<CommuteMode, string>> = {
 };
 
 const round = Math.round;
+
+type Phrases = [string, ...string[]];
+
+/** "a", "a and b", "a, b and c". */
+function listPhrase([first, ...rest]: Phrases): string {
+  const last = rest.pop();
+  return last === undefined ? first : `${[first, ...rest].join(", ")} and ${last}`;
+}
 
 function shiftActivity({ household, report }: Context): ImpactFact | null {
   const { kind, partOfDay, minutes } = household.activity;
@@ -133,9 +148,12 @@ function commuteSwitch({ household }: Context): ImpactFact | null {
   if (!vehicle) return null;
   const kg = weeklySavingKg(mode, "metro", distanceKm, daysPerWeek);
   if (kg < MIN_KG) return null;
+  const petrol = petrolRupees(commuteKgPerDay(mode, distanceKm) * daysPerWeek);
+  const saved: Phrases = [`about ${formatKg(kg)} kg of CO₂`];
+  if (isPetrolVehicle(mode)) saved.push(`${formatRupees(petrol)} of petrol`);
   return {
     id: "commute-switch",
-    text: `Taking the metro or a bus instead of your ${vehicle} for ${distanceKm} km each way saves about ${formatKg(kg)} kg of CO₂ a week.`,
+    text: `Taking the metro or a bus instead of your ${vehicle} for ${distanceKm} km each way saves ${listPhrase(saved)} a week.`,
   };
 }
 
@@ -147,7 +165,7 @@ function carpool({ household }: Context): ImpactFact | null {
   if (kg < MIN_KG) return null;
   return {
     id: "carpool",
-    text: `Sharing the car with two others cuts your share of its CO₂ by about ${formatKg(kg)} kg a week.`,
+    text: `Sharing the car with two others cuts your share of its CO₂ by about ${formatKg(kg)} kg a week, and your petrol bill by about ${formatRupees(petrolRupees(kg))} if you split the cost.`,
   };
 }
 
@@ -155,10 +173,12 @@ function remoteDay({ household }: Context): ImpactFact | null {
   const { mode, distanceKm, daysPerWeek } = household.commute;
   if (mode === "none" || daysPerWeek === 0 || distanceKm === 0) return null;
   const kg = commuteKgPerDay(mode, distanceKm);
-  const co2 = kg >= MIN_KG ? ` and about ${formatKg(kg)} kg of CO₂` : "";
+  const saved: Phrases = [`${String(commuteMinutes(mode, distanceKm))} minutes on the road`];
+  if (kg >= MIN_KG) saved.push(`about ${formatKg(kg)} kg of CO₂`);
+  if (isPetrolVehicle(mode)) saved.push(`${formatRupees(petrolRupees(kg))} of petrol`);
   return {
     id: "remote-day",
-    text: `One day a week at home instead of commuting saves ${commuteMinutes(mode, distanceKm)} minutes on the road${co2}.`,
+    text: `One day a week at home instead of commuting saves ${listPhrase(saved)}.`,
   };
 }
 

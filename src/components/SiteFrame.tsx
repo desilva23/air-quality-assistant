@@ -13,6 +13,24 @@ export function SiteHeader({ aiEnabled }: SiteHeaderProps) {
   );
 }
 
+/** The first thing on the page: what the assistant does, in one look. */
+export function Hero() {
+  return (
+    <div className="hero">
+      <h1>Plan a cleaner-air day for your household</h1>
+      <p className="lede">
+        Live air quality for any town in India, a plan for your family&apos;s day around the smog,
+        and what each choice changes for your lungs, the air and your wallet.
+      </p>
+      <ul className="hero-points" aria-label="What you get">
+        <li>Live CPCB station data</li>
+        <li>A plan for who lives with you</li>
+        <li>The impact of every choice</li>
+      </ul>
+    </div>
+  );
+}
+
 export function SiteFooter() {
   return (
     <footer className="site-footer">

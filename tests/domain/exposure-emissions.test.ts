@@ -1,11 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { commuteKgPerDay, formatKg, weeklySavingKg } from "@/lib/domain/emissions";
+import {
+  commuteKgPerDay,
+  formatKg,
+  formatRupees,
+  isPetrolVehicle,
+  petrolRupees,
+  weeklySavingKg,
+} from "@/lib/domain/emissions";
 import {
   cigarettesPerDay,
   commuteMinutes,
   indoorPm25,
   maskReduction,
   reductionPercent,
+  whoMultiple,
 } from "@/lib/domain/exposure";
 
 describe("exposure", () => {
@@ -32,6 +40,12 @@ describe("exposure", () => {
     expect(indoorPm25(100, true)).toBeCloseTo(30);
   });
 
+  it("compares PM2.5 with the WHO 24-hour guideline", () => {
+    expect(whoMultiple(150)).toBe(10);
+    expect(whoMultiple(89)).toBe(5.9);
+    expect(whoMultiple(8)).toBe(0.5);
+  });
+
   it("converts a day's PM2.5 into cigarette-equivalents", () => {
     expect(cigarettesPerDay(22)).toBe(1);
     expect(cigarettesPerDay(150)).toBe(6.8);
@@ -49,6 +63,20 @@ describe("emissions", () => {
   it("works out the weekly saving of a switch, never negative", () => {
     expect(weeklySavingKg("car", "metro", 15, 5)).toBeCloseTo(18.73, 1);
     expect(weeklySavingKg("bus", "car", 15, 5)).toBe(0);
+  });
+
+  it("prices the petrol behind the CO₂, for petrol vehicles only", () => {
+    expect(isPetrolVehicle("car")).toBe(true);
+    expect(isPetrolVehicle("two-wheeler")).toBe(true);
+    expect(isPetrolVehicle("auto")).toBe(false);
+    // 2.27193 kg of CO₂ is one litre of petrol, at ₹95.
+    expect(petrolRupees(2.27193)).toBeCloseTo(95);
+  });
+
+  it("formats rupees with Indian digit grouping, to the nearest ₹10 above ₹100", () => {
+    expect(formatRupees(42.4)).toBe("₹42");
+    expect(formatRupees(878)).toBe("₹880");
+    expect(formatRupees(123_456)).toBe("₹1,23,460");
   });
 
   it("rounds for reading", () => {

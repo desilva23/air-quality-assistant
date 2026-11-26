@@ -15,6 +15,7 @@ import {
 import type { Reading } from "../domain/air";
 import type { Situation } from "../domain/situation";
 import { formatClock } from "../domain/time";
+import { WHO_PM25_DAILY, whoMultiple } from "../domain/exposure";
 import type { AskRequest, PlanRequest } from "./contracts";
 
 const SHARED_RULES = `- Use only the air data and numbers given here. Never state an AQI, pollutant level, percentage, time or CO₂ figure that isn't in them, and never make up a forecast.
@@ -53,7 +54,8 @@ function describeReading(reading: Reading): string {
     reading.kind === "station"
       ? `measured at ${reading.station ?? "a monitoring station"}, ${String(reading.distanceKm)} km away`
       : "modelled for this spot";
-  return `PM2.5 ${Math.round(reading.pm25)} µg/m³${pm10}. Source: ${reading.source}, ${where}, at ${formatClock(reading.measuredAt)} IST.`;
+  const who = `${String(whoMultiple(reading.pm25))}× the WHO 24-hour guideline of ${String(WHO_PM25_DAILY)} µg/m³`;
+  return `PM2.5 ${Math.round(reading.pm25)} µg/m³ (${who})${pm10}. Source: ${reading.source}, ${where}, at ${formatClock(reading.measuredAt)} IST.`;
 }
 
 function describeForecast({ parts }: Situation): string {

@@ -10,7 +10,7 @@ import { HouseholdForm } from "./HouseholdForm";
 import { PlaceSearch } from "./PlaceSearch";
 import { PlanSection } from "./PlanSection";
 import { SampleProfiles } from "./SampleProfiles";
-import { SiteFooter, SiteHeader } from "./SiteFrame";
+import { Hero, SiteFooter, SiteHeader } from "./SiteFrame";
 
 // Shown only once live air has loaded, so its code loads then too.
 const AskPanel = lazy(() => import("./AskPanel").then((m) => ({ default: m.AskPanel })));
@@ -49,11 +49,7 @@ export function AssistantApp({ aiEnabled }: AssistantAppProps) {
     <>
       <SiteHeader aiEnabled={aiEnabled} />
       <main id="main" tabIndex={-1} className="container">
-        <h1>Plan a cleaner-air day for your household</h1>
-        <p className="lede">
-          Live air quality for any town in India, a plan for your family&apos;s day around the smog,
-          and what each choice changes for your lungs and the air.
-        </p>
+        <Hero />
         <section aria-labelledby="where-heading" className="card">
           <h2 id="where-heading">1. Where are you?</h2>
           <PlaceSearch onSelect={setPlace} />

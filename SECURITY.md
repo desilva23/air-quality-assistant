@@ -6,7 +6,7 @@ Please report security problems privately rather than in a public issue: use **R
 
 ## Supported versions
 
-Fixes go to `main`, which is what the live app runs. Older commits aren't patched.
+Fixes go to `main`, which is what the live app (https://air-quality-assistant-three.vercel.app) runs. Older commits aren't patched.
 
 ## How the app is protected
 

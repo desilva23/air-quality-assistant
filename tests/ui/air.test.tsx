@@ -19,6 +19,9 @@ describe("AirNow", () => {
     expect(screen.getByText("12:00 am IST")).toBeInTheDocument();
     expect(screen.getByText("220 µg/m³")).toBeInTheDocument();
     expect(screen.getByText("6.8 cigarettes")).toBeInTheDocument();
+    expect(screen.getByText(/the WHO 24-hour guideline \(15 µg\/m³\)/)).toHaveTextContent(
+      "PM2.5 is 10× the WHO 24-hour guideline (15 µg/m³).",
+    );
     expect(await axeViolations(container)).toEqual([]);
   });
 
@@ -32,14 +35,18 @@ describe("AirNow", () => {
       />,
     );
     expect(screen.getByText("Model estimate for this spot")).toBeInTheDocument();
+    expect(screen.getByText(/WHO 24-hour guideline/)).toHaveTextContent("PM2.5 is 2×");
     expect(screen.getByText("For")).toBeInTheDocument();
     expect(screen.getByText("No station nearby.")).toBeInTheDocument();
     expect(screen.getByText(/set by PM10/)).toBeInTheDocument();
     model.unmount();
     const noPm10 = render(
-      <AirNow report={report({ reading: { ...MODEL_READING, pm10: null } })} />,
+      <AirNow report={report({ reading: { ...MODEL_READING, pm25: 12, pm10: null } })} />,
     );
     expect(screen.queryByText("PM10")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("PM2.5 is within the WHO 24-hour guideline (15 µg/m³)."),
+    ).toBeInTheDocument();
     noPm10.unmount();
     render(<AirNow report={report({ reading: { ...report().reading, station: null } })} />);
     expect(screen.getByText("Monitoring station, 3.2 km away")).toBeInTheDocument();

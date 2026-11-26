@@ -1,6 +1,6 @@
 # Deployment
 
-Every push to `main` deploys to production through Vercel's GitHub integration.
+The live app is at https://air-quality-assistant-three.vercel.app. Every push to `main` deploys to production through Vercel's GitHub integration.
 
 ## Environment variables
 
@@ -22,9 +22,9 @@ Set them in Vercel → Project → Settings → Environment Variables. Never com
 ## Checking a deployment
 
 ```bash
-curl -sI https://<your-deployment>/ | grep -iE 'content-security-policy|strict-transport|x-content-type|referrer-policy|permissions-policy'
-curl -s https://<your-deployment>/api/health          # {"ok":true,"ai":"groq","stations":true}
-curl -s "https://<your-deployment>/api/air?lat=28.61&lon=77.21" | head -c 300
+curl -sI https://air-quality-assistant-three.vercel.app/ | grep -iE 'content-security-policy|strict-transport|x-content-type|referrer-policy|permissions-policy'
+curl -s https://air-quality-assistant-three.vercel.app/api/health          # {"ok":true,"ai":"groq","stations":true}
+curl -s "https://air-quality-assistant-three.vercel.app/api/air?lat=28.61&lon=77.21" | head -c 300
 ```
 
 Then run Lighthouse on mobile and desktop, and the "Try it in two minutes" steps from the README by hand.

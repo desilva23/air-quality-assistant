@@ -32,7 +32,7 @@ flowchart LR
 | --- | --- | --- |
 | India's AQI from raw concentrations | Linear interpolation inside CPCB's bands for PM2.5 and PM10; the higher sub-index wins | `src/lib/domain/aqi.ts` |
 | The cleanest time to be outdoors | Slide a window of the activity's length over the next 24 hours of forecast, between 6 am and 9 pm IST, and keep the lowest mean | `src/lib/domain/timing.ts` |
-| The direct impact of a choice | Dose ratios from forecast, mask protection or indoor share; CO₂ from India GHG Program factors × distance × days | `src/lib/domain/impacts.ts`, `exposure.ts`, `emissions.ts` |
+| The direct impact of a choice | Dose ratios from forecast, mask protection or indoor share; CO₂ from India GHG Program factors × distance × days, and petrol cost from the same paper's CO₂ per litre | `src/lib/domain/impacts.ts`, `exposure.ts`, `emissions.ts` |
 | Choosing a data source | Ask both sources at once; use the nearest station that reported within 3 h and 25 km, otherwise the model, and say why | `src/lib/air/report.ts` |
 | Keeping the model honest | The reply schema's `impactId` is an enum of this request's computed fact ids | `src/lib/ai/contracts.ts` |
 

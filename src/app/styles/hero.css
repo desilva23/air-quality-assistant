@@ -1,0 +1,44 @@
+/* The opening band: a bold first screen that still meets AA contrast. */
+
+.hero {
+  background: linear-gradient(135deg, #0b2a5b 0%, #12457a 55%, #0d5f61 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: clamp(1.5rem, 5vw, 2.75rem) clamp(1.25rem, 4vw, 2.5rem);
+  margin: 0.5rem 0 1.25rem;
+  box-shadow: 0 10px 30px rgb(11 42 91 / 0.25);
+}
+
+.hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.hero .lede {
+  color: #dbe7ff;
+  max-width: 38rem;
+}
+
+.hero-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.hero-points li {
+  background: rgb(255 255 255 / 0.12);
+  border: 1px solid rgb(255 255 255 / 0.3);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hero-points li::before {
+  content: "✓ ";
+  color: #9be7c4;
+}

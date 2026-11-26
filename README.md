@@ -1,12 +1,12 @@
 # Urban Air Quality Assistant
 
 [![CI](https://github.com/desilva23/air-quality-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/desilva23/air-quality-assistant/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-201%20unit%20%2B%2012%20e2e-2f6b45)
+![Tests](https://img.shields.io/badge/tests-204%20unit%20%2B%2012%20e2e-2f6b45)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-2f6b45)
 ![a11y](https://img.shields.io/badge/axe-0%20violations-2f6b45)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
 
-**Live:** _added after the first deploy_
+**Live:** https://air-quality-assistant-three.vercel.app
 
 A GenAI assistant for Indian households living through winter smog. It reads **live** air quality for any town in India, then builds the family's day around it: when to go out, how to commute, what to do at home, and the **direct impact of each choice** in numbers the app computes rather than the AI guesses.
 
@@ -17,7 +17,7 @@ A GenAI assistant for Indian households living through winter smog. It reads **l
 
 | Any town in India | 2 AI features | 8 computed impacts | 0 axe violations | 100% coverage |
 | --- | --- | --- | --- | --- |
-| search or device location | language only, never the numbers | exposure and CO₂, per household | light and dark | enforced in CI |
+| search or device location | language only, never the numbers | exposure, CO₂ and ₹, per household | light and dark | enforced in CI |
 
 ## Chosen vertical
 
@@ -32,7 +32,7 @@ A parent in Delhi, Noida, Kolkata or Mumbai wakes to an AQI of 300+. Should the 
 - **Where you are** decides the data. The nearest OpenAQ station that has reported PM2.5 in the last 3 hours (CPCB stations are among them) gives the current reading. The Copernicus CAMS model, through Open-Meteo, gives the 24-hour forecast, and stands in when no station is close or fresh. The source, station, distance and time are always shown.
 - **Who lives with you** decides the caution. Children, older adults, someone with asthma, COPD or a heart condition, or a pregnant family member make the plan protect them first.
 - **When you are outdoors** decides the timing. The forecast finds the cleanest waking hour and the cleanest window for your activity's length, and works out how much moving it cuts your dose.
-- **How you travel** decides the swaps. Drivers and riders get the weekly CO₂ saving of metro or bus, carpooling and a work-from-home day. Open-air commuters get the mask maths for their minutes outside.
+- **How you travel** decides the swaps. Drivers and riders get the weekly CO₂ and petrol (₹) saving of metro or bus, carpooling and a work-from-home day. Open-air commuters get the mask maths for their minutes outside.
 - **Your home** decides the indoor advice: purifier or not, cooking fuel, smoking.
 - **Every item says why**, and items with a measurable effect carry an **Impact** line with the computed number.
 
@@ -52,13 +52,13 @@ A parent in Delhi, Noida, Kolkata or Mumbai wakes to an AQI of 300+. Should the 
 | --- | --- |
 | **GenAI-powered assistant** | Groq writes the personal plan and answers free-text questions, from the live data and the household profile (`src/lib/ai`). |
 | **Families and communities** | A household profile covers children, older adults, health conditions and pregnancy. Every plan ends with a short message to copy into a family or housing-society group. |
-| **Severe winter smog and urban air pollution** | Live PM2.5 and PM10 from OpenAQ stations or the CAMS model. India's AQI bands and CPCB's health notes. A 24-hour forecast. |
+| **Severe winter smog and urban air pollution** | Live PM2.5 and PM10 from OpenAQ stations or the CAMS model. India's AQI bands, CPCB's health notes and how many times the WHO 24-hour guideline the air is. A 24-hour forecast. |
 | **Tailored to location** | Search any town in India (Open-Meteo geocoding, restricted to India) or use the device's location. Data comes from the nearest station or the model at that point. |
 | **Tailored to lifestyle** | Commute mode, distance and days; main outdoor activity, its time and length; purifier, cooking fuel, smoking; usual mask. |
 | **Low-emission daily routines** | A morning, afternoon and evening plan that times outdoor activity to the cleaner hours and favours metro, bus and fewer trips. |
 | **Indoor air quality hacks** | Purifier placement, ventilating only at the cleanest hour, wet mopping, avoiding incense and coils, solid-fuel cooking and smoking advice. |
 | **Sustainable alternatives** | Metro or bus instead of car, scooter or auto; carpooling; a work-from-home day; combining errands; no open burning. |
-| **Clearly explains the direct impact of choices** | Eight computed impacts: dose cut from shifting an activity or moving it indoors, from an N95 versus the current mask, indoor PM2.5 with a purifier, the cleanest hour to air the home, and weekly CO₂ from switching, carpooling or staying home. |
+| **Clearly explains the direct impact of choices** | Eight computed impacts: dose cut from shifting an activity or moving it indoors, from an N95 versus the current mask, indoor PM2.5 with a purifier, the cleanest hour to air the home, and weekly CO₂ and petrol cost (₹) from switching, carpooling or staying home. |
 
 ### How GenAI is used, and where it isn't
 
@@ -107,7 +107,7 @@ More in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   - Masks as typically worn keep out 15% (cloth), 35% (surgical) or 75% (N95, below its 95% lab rating because of fit).
   - Indoor PM2.5 is taken as 70% of outdoor with windows mostly shut, or 30% with a purifier running.
   - Door-to-door speeds are walk 5, cycle 12, scooter 22, auto 18, bus 15, metro 28 and car 22 km/h.
-- **The cigarette comparison** is Berkeley Earth's rule of thumb: 22 µg/m³ of PM2.5 for a day ≈ one cigarette.
+- **The cigarette comparison** is Berkeley Earth's rule of thumb: 22 µg/m³ of PM2.5 for a day ≈ one cigarette. The WHO comparison uses its 2021 guideline for the 24-hour mean, 15 µg/m³.
 - **CO₂ factors** come from the India GHG Program's *India Specific Road Transport Emission Factors* (v1.0, 2015):
   - petrol hatchback under 1400 cc: 0.140 kg/km;
   - scooter under 110 cc: 0.0368 kg/km;
@@ -115,6 +115,7 @@ More in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   - intra-city bus: 0.0152 kg per passenger-km.
   
   The paper gives no metro figure, so the bus figure stands in as a conservative estimate.
+- **Petrol cost** converts the CO₂ back to litres with the same paper's 2.27193 kg CO₂ per litre of petrol, at ₹95 per litre (Delhi's retail price, rounded; it differs by state and over time). Scooters and cars are taken to run on petrol, and auto-rickshaws on CNG, so autos show no petrol cost.
 - **One household per browser,** with no accounts. The profile and place stay in localStorage, and are sent to the server only with a plan or question request. They are never logged.
 - **General guidance, not medical advice.** The app tells people to see a doctor for breathlessness or chest pain.
 
@@ -126,7 +127,7 @@ Requires Node 22.
 npm ci
 cp .env.example .env.local   # all keys are optional; without them the app uses the CAMS model and built-in guidance
 npm run dev                  # http://localhost:3000
-npm run check                # format, strict lint, Knip, typecheck, 201 tests with 100% coverage
+npm run check                # format, strict lint, Knip, typecheck, 204 tests with 100% coverage
 npx playwright install chromium
 npm run test:e2e             # production build in Chromium: journeys, CSP, axe in light and dark, 320 px reflow
 ```
@@ -172,7 +173,7 @@ Every phrase of the brief maps to a feature in [What it does](#what-it-does). Li
 
 ### Testing
 
-- **Unit and integration:** 201 Vitest tests across the domain, air data, AI, server, client, UI and hygiene suites. The gate is 100% statement, branch, function and line coverage, enforced in CI.
+- **Unit and integration:** 204 Vitest tests across the domain, air data, AI, server, client, UI and hygiene suites. The gate is 100% statement, branch, function and line coverage, enforced in CI.
 - **Accessibility in tests:** axe runs in the component tests.
 - **Browser:** 12 Playwright tests on the production build cover the journeys, personalisation, persistence, CSP and headers, API refusals, axe in light and dark, and 320 px reflow.
 
@@ -196,7 +197,7 @@ Details are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 | Code quality | strictTypeChecked with zero findings; no casts, `any` or non-null assertions; files under 250 lines; pure domain; shared Zod contracts; typed errors | `src/lib/domain`, `src/lib/client/api.ts`, `eslint.config.mjs`, `tests/quality/hygiene.test.ts`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Security | Server-only keys, same-origin + shared rate limit + size cap + Zod on every route, CSP nonce, prompt fencing, code-only errors, CodeQL | [SECURITY.md](SECURITY.md), `src/proxy.ts`, `src/lib/server/` |
 | Efficiency | Redis cache with `X-Cache: HIT`, parallel upstream calls with timeouts, AI only on request, memoised and lazy UI | `src/lib/server/stores.ts`, `src/lib/air/report.ts`, `src/components/AssistantApp.tsx` |
-| Testing | 201 unit and integration tests, 100% coverage enforced, 12 Playwright tests with axe | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |
+| Testing | 204 unit and integration tests, 100% coverage enforced, 12 Playwright tests with axe | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |
 | Accessibility | WCAG 2.2 AA target, axe in jsdom and Chromium (light and dark), reflow, preferences | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md), `src/app/styles/preferences.css` |
 | Problem statement alignment | Live data for any town in India, personal routines, indoor tips, alternatives and computed impacts | [What it does](#what-it-does), `src/lib/domain/impacts.ts` |
 

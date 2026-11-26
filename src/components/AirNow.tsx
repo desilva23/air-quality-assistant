@@ -9,7 +9,7 @@ import {
   indianAqi,
   type AqiCategory,
 } from "@/lib/domain/aqi";
-import { cigarettesPerDay } from "@/lib/domain/exposure";
+import { cigarettesPerDay, WHO_PM25_DAILY, whoMultiple } from "@/lib/domain/exposure";
 import { formatClock } from "@/lib/domain/time";
 import { OutlookChart } from "./OutlookChart";
 
@@ -68,6 +68,7 @@ export const AirNow = memo(function AirNow({ report }: AirNowProps) {
   const { reading } = report;
   const aqi = useMemo(() => indianAqi(reading), [reading]);
   const cigarettes = cigarettesPerDay(reading.pm25);
+  const who = whoMultiple(reading.pm25);
 
   return (
     <div className="air-now">
@@ -83,6 +84,15 @@ export const AirNow = memo(function AirNow({ report }: AirNowProps) {
         </p>
       </div>
       <p className="health">{CATEGORY_HEALTH[aqi.category]}</p>
+      <p className="who">
+        {who > 1 ? (
+          <>
+            PM2.5 is <strong>{who}×</strong> the WHO 24-hour guideline ({WHO_PM25_DAILY} µg/m³).
+          </>
+        ) : (
+          <>PM2.5 is within the WHO 24-hour guideline ({WHO_PM25_DAILY} µg/m³).</>
+        )}
+      </p>
       <SourceDetails reading={reading} />
       {report.note && <p className="note">{report.note}</p>}
       <p className="small">
