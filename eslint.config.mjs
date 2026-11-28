@@ -28,13 +28,10 @@ export default defineConfig([
       "@typescript-eslint/no-restricted-imports": [
         "error",
         {
-          paths: [
-            {
-              name: "zod",
-              message: "Import z from src/lib/zod.ts, which configures it.",
-              allowTypeImports: true,
-            },
-          ],
+          paths: ["zod", "zod/mini"].map((name) => ({
+            name,
+            message: 'Use `import * as z from "@/lib/zod"`, which configures Zod Mini.',
+          })),
         },
       ],
     },
