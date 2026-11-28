@@ -16,7 +16,7 @@ vi.mock("@/lib/air/open-meteo", () => ({ searchPlaces: vi.fn() }));
 const post = (path: string, body: unknown) =>
   new Request(`http://localhost${path}`, {
     method: "POST",
-    headers: { "content-type": "application/json", "x-forwarded-for": "3.3.3.3" },
+    headers: { "content-type": "application/json", "x-forwarded-for": "192.0.2.3" },
     body: JSON.stringify(body),
   });
 

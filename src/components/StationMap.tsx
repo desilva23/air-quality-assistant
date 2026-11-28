@@ -32,7 +32,7 @@ const ATTRIBUTION =
  * The stations around the chosen place on a map. Leaflet loads only when this
  * renders, so it stays out of the first page load.
  */
-export function StationMap({ centre, stations, label }: StationMapProps) {
+export function StationMap({ centre, stations, label }: Readonly<StationMapProps>) {
   const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

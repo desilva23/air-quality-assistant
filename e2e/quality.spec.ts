@@ -80,7 +80,9 @@ test("markup injected into the page can't run script", async ({ page, pageErrors
     document.body.append(box);
   });
   await expect
-    .poll(() => pageErrors.filter((e) => e.startsWith("CSP violation:")).sort())
+    .poll(() =>
+      pageErrors.filter((e) => e.startsWith("CSP violation:")).sort((a, b) => a.localeCompare(b)),
+    )
     .toEqual([
       "CSP violation: script-src-attr blocked inline",
       "CSP violation: script-src-elem blocked inline",

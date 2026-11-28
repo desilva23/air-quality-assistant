@@ -26,7 +26,7 @@ npm run test:e2e   # production build in Chromium with axe
 
 ## Style
 
-- TypeScript strict; typescript-eslint `strictTypeChecked` and `stylisticTypeChecked` at zero findings.
+- TypeScript strict; typescript-eslint `strictTypeChecked` and `stylisticTypeChecked`, plus SonarJS `recommended`, at zero findings.
 - No `any`, no casts except `as const`, no non-null assertions, no disabled lint rules.
 - Files under 250 lines, functions under 80, complexity at most 10.
 - Commit messages follow `type(scope): summary`, for example `feat(impacts): add carpool saving`.

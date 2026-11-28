@@ -51,7 +51,7 @@ const ItemList = memo(function ItemList({ items, impacts }: ItemListProps) {
   );
 });
 
-function ShareBox({ text }: { text: string }) {
+function ShareBox({ text }: Readonly<{ text: string }>) {
   const { plan } = useMessages();
   const [copied, setCopied] = useState<"done" | "failed" | null>(null);
   async function copy() {

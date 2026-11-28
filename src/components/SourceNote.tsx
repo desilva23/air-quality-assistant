@@ -9,8 +9,10 @@ export interface SourceNoteProps {
 }
 
 /** Says whether content was written by the AI or is the built-in guidance, and why. */
-export function SourceNote({ source, notice }: SourceNoteProps) {
+export function SourceNote({ source, notice }: Readonly<SourceNoteProps>) {
   const { plan } = useMessages();
-  const text = source === "ai" ? plan.fromAi : notice ? plan.notices[notice] : plan.builtIn;
+  let text = plan.builtIn;
+  if (source === "ai") text = plan.fromAi;
+  else if (notice) text = plan.notices[notice];
   return <p className={`source-note ${source}`}>{text}</p>;
 }

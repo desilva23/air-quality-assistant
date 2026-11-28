@@ -12,7 +12,7 @@ export interface AskPanelProps {
 }
 
 /** Free-text questions about today, answered for this household from the live data. */
-export function AskPanel({ context }: AskPanelProps) {
+export function AskPanel({ context }: Readonly<AskPanelProps>) {
   const id = useId();
   const m = useMessages();
   const [question, setQuestion] = useState("");

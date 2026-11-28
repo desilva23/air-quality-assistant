@@ -78,10 +78,9 @@ function sensitiveNames({ situation, labels }: Ctx): string[] {
 
 function generalItem(ctx: Ctx, part: PartOfDay): PlanItem {
   const names = sensitiveNames(ctx);
+  const who = names.length ? listPhrase(names, ctx.request.language) : ctx.copy.everyone;
   const action = isUnhealthy(categoryFor(ctx, part))
-    ? ctx.copy.keepIndoors(
-        names.length ? listPhrase(names, ctx.request.language) : ctx.copy.everyone,
-      )
+    ? ctx.copy.keepIndoors(who)
     : ctx.copy.fineOutdoors(names.length > 0);
   return { action, why: forecastWhy(ctx, part), impactId: null };
 }

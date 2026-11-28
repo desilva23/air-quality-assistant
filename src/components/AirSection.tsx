@@ -17,7 +17,14 @@ export interface AirSectionProps {
 }
 
 /** Live air for the chosen place, with loading and failure states. */
-export function AirSection({ place, status, report, aqi, error, onRetry }: AirSectionProps) {
+export function AirSection({
+  place,
+  status,
+  report,
+  aqi,
+  error,
+  onRetry,
+}: Readonly<AirSectionProps>) {
   const { air, errors } = useMessages();
   return (
     <section

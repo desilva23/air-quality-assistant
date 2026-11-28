@@ -73,13 +73,13 @@ describe("createStores with Upstash Redis", () => {
   it("counts per hashed client and window in one round trip", async () => {
     const fetch = stubFetch(() => json([{ result: 3 }, { result: 1 }]));
     const { limiter } = createStores(options, redis, () => 90_000);
-    expect(await limiter.check("1.2.3.4")).toEqual({ ok: false, retryAfterSeconds: 30 });
+    expect(await limiter.check("203.0.113.4")).toEqual({ ok: false, retryAfterSeconds: 30 });
     const [url, init] = fetch.mock.calls[0] ?? [];
     expect(url).toBe("https://redis.example/pipeline");
     expect(init?.headers).toEqual({ Authorization: "Bearer token" });
     const commands = bodyOf(init) as string[][];
     expect(commands[0]?.[1]).toMatch(/^aqa:test:rate:[0-9a-f]{32}:1$/);
-    expect(JSON.stringify(commands)).not.toContain("1.2.3.4");
+    expect(JSON.stringify(commands)).not.toContain("203.0.113.4");
   });
 
   it("allows requests under the limit", async () => {

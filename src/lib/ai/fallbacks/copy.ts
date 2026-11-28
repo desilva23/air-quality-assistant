@@ -52,8 +52,10 @@ const ENGLISH_COPY: FallbackCopy = {
   everyone: "everyone",
   fineOutdoors: (sensitive) =>
     `Fine for errands and time outdoors${sensitive ? ", keeping effort light for the most sensitive" : ""}.`,
-  headline: (place, category, aqi, care) =>
-    `${category} air in ${place} today (AQI ${String(aqi)})${care ? `: extra care for ${care}` : ""}`,
+  headline: (place, category, aqi, care) => {
+    const extra = care ? `: extra care for ${care}` : "";
+    return `${category} air in ${place} today (AQI ${String(aqi)})${extra}`;
+  },
   shareLead: (place, category, aqi, source) =>
     `Air in ${place} today: ${category}, AQI ${String(aqi)}. Source: ${source}.`,
   noAnswer: (place, category, aqi) =>

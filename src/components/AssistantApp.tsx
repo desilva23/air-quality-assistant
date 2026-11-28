@@ -21,7 +21,7 @@ export interface AssistantAppProps {
 }
 
 /** The whole assistant: place, live air, household, today's plan and questions. */
-export function AssistantApp({ aiEnabled }: AssistantAppProps) {
+export function AssistantApp({ aiEnabled }: Readonly<AssistantAppProps>) {
   const {
     place,
     report,

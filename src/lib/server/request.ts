@@ -25,7 +25,7 @@ export function fromThisSite(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return true;
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  return URL.parse(origin)?.host === host;
+  return host !== null && URL.parse(origin)?.host === host;
 }
 
 /** A refusal for a cross-site or over-limit request, or null to carry on. */

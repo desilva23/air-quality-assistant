@@ -22,8 +22,10 @@ export const TAMIL_COPY: FallbackCopy = {
   everyone: "அனைவரும்",
   fineOutdoors: (sensitive) =>
     `வேலைகளுக்கும் வெளியே நேரம் செலவிடவும் பரவாயில்லை${sensitive ? "; உணர்திறன் மிக்கவர்களுக்குக் குறைந்த உழைப்பு போதும்" : ""}.`,
-  headline: (place, category, aqi, care) =>
-    `இன்று ${place} காற்று: ${category} (AQI ${String(aqi)})${care ? `; ${care} மீது கூடுதல் கவனம்` : ""}`,
+  headline: (place, category, aqi, care) => {
+    const extra = care ? `; ${care} மீது கூடுதல் கவனம்` : "";
+    return `இன்று ${place} காற்று: ${category} (AQI ${String(aqi)})${extra}`;
+  },
   shareLead: (place, category, aqi, source) =>
     `இன்று ${place} காற்று: ${category}, AQI ${String(aqi)}. மூலம்: ${source}.`,
   noAnswer: (place, category, aqi) =>

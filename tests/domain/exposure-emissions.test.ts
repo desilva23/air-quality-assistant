@@ -42,13 +42,13 @@ describe("exposure", () => {
 
   it("compares PM2.5 with the WHO 24-hour guideline", () => {
     expect(whoMultiple(150)).toBe(10);
-    expect(whoMultiple(89)).toBe(5.9);
+    expect(whoMultiple(89)).toBeCloseTo(5.9, 10);
     expect(whoMultiple(8)).toBe(0.5);
   });
 
   it("converts a day's PM2.5 into cigarette-equivalents", () => {
     expect(cigarettesPerDay(22)).toBe(1);
-    expect(cigarettesPerDay(150)).toBe(6.8);
+    expect(cigarettesPerDay(150)).toBeCloseTo(6.8, 10);
   });
 });
 

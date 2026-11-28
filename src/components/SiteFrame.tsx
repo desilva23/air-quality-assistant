@@ -12,7 +12,7 @@ export interface SiteHeaderProps {
 }
 
 /** English or Tamil; the current one is pressed. Names are written in their own script. */
-function LanguageSwitch({ onLanguage }: { onLanguage: (language: Language) => void }) {
+function LanguageSwitch({ onLanguage }: Readonly<{ onLanguage: (language: Language) => void }>) {
   const current = useLanguage();
   const m = useMessages();
   return (
@@ -32,7 +32,7 @@ function LanguageSwitch({ onLanguage }: { onLanguage: (language: Language) => vo
   );
 }
 
-export function SiteHeader({ aiEnabled, onLanguage }: SiteHeaderProps) {
+export function SiteHeader({ aiEnabled, onLanguage }: Readonly<SiteHeaderProps>) {
   const m = useMessages();
   return (
     <header className="site-header">
@@ -57,7 +57,7 @@ export interface SkyBandProps {
 }
 
 /** The opening band. Its colour is the sky over the chosen place: clear, hazy or smoky. */
-export function SkyBand({ category, children }: SkyBandProps) {
+export function SkyBand({ category, children }: Readonly<SkyBandProps>) {
   return <div className={`sky sky-${category ?? "unknown"}`}>{children}</div>;
 }
 

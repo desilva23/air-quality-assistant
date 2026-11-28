@@ -26,7 +26,7 @@ const MEMBERS: readonly (keyof Household["members"])[] = [
   "pregnant",
 ];
 
-export function MembersFieldset({ value, onChange }: SectionProps<"members">) {
+export function MembersFieldset({ value, onChange }: Readonly<SectionProps<"members">>) {
   const { household } = useMessages();
   return (
     <fieldset>
@@ -43,7 +43,7 @@ export function MembersFieldset({ value, onChange }: SectionProps<"members">) {
   );
 }
 
-export function CommuteFieldset({ value, onChange }: SectionProps<"commute">) {
+export function CommuteFieldset({ value, onChange }: Readonly<SectionProps<"commute">>) {
   const { household } = useMessages();
   const labels = useLabels();
   return (
@@ -82,7 +82,7 @@ export function CommuteFieldset({ value, onChange }: SectionProps<"commute">) {
   );
 }
 
-export function ActivityFieldset({ value, onChange }: SectionProps<"activity">) {
+export function ActivityFieldset({ value, onChange }: Readonly<SectionProps<"activity">>) {
   const { household } = useMessages();
   const labels = useLabels();
   return (
@@ -125,7 +125,7 @@ export interface HomeFieldsetProps extends SectionProps<"home"> {
   onMaskChange: (mask: Mask) => void;
 }
 
-export function HomeFieldset({ value, onChange, mask, onMaskChange }: HomeFieldsetProps) {
+export function HomeFieldset({ value, onChange, mask, onMaskChange }: Readonly<HomeFieldsetProps>) {
   const { household } = useMessages();
   const labels = useLabels();
   return (

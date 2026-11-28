@@ -44,7 +44,8 @@ const PipelineReplySchema = z.array(
 /** Sends Redis commands to Upstash's REST API in one round trip. */
 function upstash({ url, token }: RedisCredentials): RunCommands {
   return async (commands) => {
-    const response = await fetch(`${url.replace(/\/+$/, "")}/pipeline`, {
+    const base = url.endsWith("/") ? url : `${url}/`;
+    const response = await fetch(new URL("pipeline", base).href, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify(commands),

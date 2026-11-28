@@ -7,7 +7,7 @@ import { NumberField, SelectField } from "@/components/fields";
 import { DEFAULT_HOUSEHOLD, type Household } from "@/lib/domain/household";
 import { axeViolations } from "../support/axe";
 
-function Harness({ onChange }: { onChange: (value: Household) => void }) {
+function Harness({ onChange }: Readonly<{ onChange: (value: Household) => void }>) {
   const [value, setValue] = useState(DEFAULT_HOUSEHOLD);
   return (
     <HouseholdForm

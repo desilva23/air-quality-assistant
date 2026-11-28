@@ -5,12 +5,13 @@
  * has no nonce, so it doesn't run.
  */
 export function contentSecurityPolicy(nonce: string, dev: boolean): string {
+  const styles = dev ? "'unsafe-inline'" : `'nonce-${nonce}'`;
   return [
     "default-src 'self'",
     // React uses eval for its debugging tools in development, never in production.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
     // The development server injects styles at runtime; production serves stylesheets.
-    `style-src 'self' ${dev ? "'unsafe-inline'" : `'nonce-${nonce}'`}`,
+    `style-src 'self' ${styles}`,
     // Map tiles come from OpenStreetMap's tile servers.
     "img-src 'self' data: https://tile.openstreetmap.org",
     "font-src 'self'",

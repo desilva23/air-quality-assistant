@@ -12,19 +12,19 @@ const request = (headers: Record<string, string>, body?: BodyInit) =>
 
 describe("client address", () => {
   it("counts proxy hops from the right, ignoring what the client wrote", () => {
-    const forwarded = request({ "x-forwarded-for": "6.6.6.6, 1.2.3.4" });
-    expect(clientKey(forwarded, 1)).toBe("1.2.3.4");
-    expect(clientKey(forwarded, 2)).toBe("6.6.6.6");
-    expect(clientKey(forwarded, 5)).toBe("6.6.6.6");
+    const forwarded = request({ "x-forwarded-for": "198.51.100.6, 203.0.113.4" });
+    expect(clientKey(forwarded, 1)).toBe("203.0.113.4");
+    expect(clientKey(forwarded, 2)).toBe("198.51.100.6");
+    expect(clientKey(forwarded, 5)).toBe("198.51.100.6");
   });
 
   it("falls back to x-real-ip, then a shared bucket", () => {
-    expect(clientKey(request({ "x-real-ip": "9.9.9.9" }), 1)).toBe("9.9.9.9");
+    expect(clientKey(request({ "x-real-ip": "192.0.2.9" }), 1)).toBe("192.0.2.9");
     expect(clientKey(request({}), 1)).toBe("anonymous");
   });
 
   it("trusts one proxy hop by default, as on Vercel", () => {
-    expect(clientKey(request({ "x-forwarded-for": "6.6.6.6, 1.1.1.1" }))).toBe("1.1.1.1");
+    expect(clientKey(request({ "x-forwarded-for": "198.51.100.6, 192.0.2.1" }))).toBe("192.0.2.1");
   });
 });
 

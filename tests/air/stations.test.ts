@@ -43,7 +43,7 @@ describe("nearbyStations", () => {
     });
     expect(stations.map((s) => s.name)).not.toContain("Station 2");
     expect(stations.map((s) => s.name)).not.toContain("Station 3");
-    expect(stations.length).toBe(MAP_STATIONS - 2);
+    expect(stations).toHaveLength(MAP_STATIONS - 2);
   });
 
   it("uses the real clock by default", async () => {

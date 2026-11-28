@@ -19,7 +19,7 @@ export interface IconProps {
   name: IconName;
 }
 
-export function Icon({ name }: IconProps) {
+export function Icon({ name }: Readonly<IconProps>) {
   return (
     <svg
       className="icon"

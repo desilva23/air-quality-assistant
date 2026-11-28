@@ -16,7 +16,7 @@ export interface ExtraPanelsProps {
  * Below the plan: stations around the place, a what-if for today's dose, and
  * every way to make the commute. Loaded only once live air has arrived.
  */
-export function ExtraPanels({ place, report, household }: ExtraPanelsProps) {
+export function ExtraPanels({ place, report, household }: Readonly<ExtraPanelsProps>) {
   const { mask, home } = household;
   return (
     <>

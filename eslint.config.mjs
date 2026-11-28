@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import sonarjs from "eslint-plugin-sonarjs";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
@@ -36,6 +37,8 @@ export default defineConfig([
       ],
     },
   },
+  // SonarQube's own JavaScript and TypeScript rules (SonarJS), at zero findings.
+  { files: ["**/*.{ts,tsx,mts}"], ...sonarjs.configs.recommended },
   { files: ["src/lib/zod.ts"], rules: { "@typescript-eslint/no-restricted-imports": "off" } },
   {
     files: ["src/**/*.{ts,tsx}"],

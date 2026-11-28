@@ -11,7 +11,7 @@ export interface AskSectionProps {
   context: PlanRequest;
 }
 
-export function AskSection({ context }: AskSectionProps) {
+export function AskSection({ context }: Readonly<AskSectionProps>) {
   const { ask } = useMessages();
   return (
     <section aria-labelledby="ask-heading" className="card span-all">

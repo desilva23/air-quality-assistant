@@ -6,6 +6,24 @@ import { MESSAGES } from "@/lib/i18n/messages";
 
 const TAMIL = /[஀-௿]/;
 
+/** The numbers and names filled into the messages below, in order. */
+const ORDERED_VALUES = [
+  "Chennai",
+  "Alandur",
+  "2:00 PM",
+  "6.1",
+  "4.2",
+  "180",
+  "110",
+  "7",
+  "3.2",
+  "164",
+  "5.4",
+  "1,484",
+  "38",
+  "15",
+];
+
 describe("languages", () => {
   it("offers English and Tamil, each named in its own script", () => {
     expect(LANGUAGES).toEqual(["en", "ta"]);
@@ -56,9 +74,14 @@ describe("messages", () => {
         m.choices.cut(38),
         m.commute.trip(15, 5),
       ];
-      expect(filled.join(" ")).toMatch(
-        /Chennai.*Alandur.*2:00 PM.*6\.1.*4\.2.*180.*110.*7.*3\.2.*164.*5\.4.*1,484.*38.*15/s,
-      );
+      // Every value appears, in the order the messages were filled.
+      const joined = filled.join(" ");
+      let from = 0;
+      for (const value of ORDERED_VALUES) {
+        const at = joined.indexOf(value, from);
+        expect(at, `${language}: ${value}`).toBeGreaterThanOrEqual(0);
+        from = at + value.length;
+      }
       if (language === "ta") for (const text of filled) expect(text).toMatch(TAMIL);
     }
   });

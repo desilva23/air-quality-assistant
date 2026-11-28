@@ -13,7 +13,7 @@ export interface LanguageProviderProps {
 }
 
 /** Makes the reader's language available to every component below it. */
-export function LanguageProvider({ language, children }: LanguageProviderProps) {
+export function LanguageProvider({ language, children }: Readonly<LanguageProviderProps>) {
   return <LanguageContext value={language}>{children}</LanguageContext>;
 }
 

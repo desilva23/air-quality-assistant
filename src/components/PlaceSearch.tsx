@@ -17,7 +17,7 @@ const placeLabel = (place: Place): string =>
   place.region ? `${place.name}, ${place.region}` : place.name;
 
 /** Find a town by name, or use the device's location, anywhere in India. */
-export function PlaceSearch({ onSelect }: PlaceSearchProps) {
+export function PlaceSearch({ onSelect }: Readonly<PlaceSearchProps>) {
   const { where, errors } = useMessages();
   const inputId = useId();
   const [query, setQuery] = useState("");
@@ -42,8 +42,10 @@ export function PlaceSearch({ onSelect }: PlaceSearchProps) {
 
   const places = search.data?.places ?? [];
   const noMatch = search.status === "done" && !places.length;
-  const failure = search.error ? errors[search.error] : noMatch ? where.noMatch : "";
-  const status = search.loading ? where.searching : failure;
+  let status = "";
+  if (search.loading) status = where.searching;
+  else if (search.error) status = errors[search.error];
+  else if (noMatch) status = where.noMatch;
 
   return (
     <div className="place-search">

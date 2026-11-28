@@ -24,7 +24,7 @@ export function NumberField({
   step = 1,
   unit,
   onCommit,
-}: NumberFieldProps) {
+}: Readonly<NumberFieldProps>) {
   const id = useId();
   const [draft, setDraft] = useState(String(value));
 
@@ -77,7 +77,7 @@ export function SelectField<T extends string>({
   options,
   labels,
   onChange,
-}: SelectFieldProps<T>) {
+}: Readonly<SelectFieldProps<T>>) {
   const id = useId();
   return (
     <div className="field">
@@ -106,7 +106,7 @@ export interface CheckboxFieldProps {
   onChange: (checked: boolean) => void;
 }
 
-export function CheckboxField({ label, checked, onChange }: CheckboxFieldProps) {
+export function CheckboxField({ label, checked, onChange }: Readonly<CheckboxFieldProps>) {
   return (
     <label className="check">
       <input

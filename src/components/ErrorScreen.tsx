@@ -8,7 +8,7 @@ export interface ErrorScreenProps {
 }
 
 /** Shown instead of the page when rendering fails. Saved answers stay in the browser. */
-export function ErrorScreen({ reset }: ErrorScreenProps) {
+export function ErrorScreen({ reset }: Readonly<ErrorScreenProps>) {
   const [language] = useSavedLanguage();
   const { failure } = MESSAGES[language];
   return (

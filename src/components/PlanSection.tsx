@@ -15,7 +15,7 @@ export interface PlanSectionProps {
 }
 
 /** Builds today's plan on request, and says when it no longer matches the answers. */
-export function PlanSection({ request }: PlanSectionProps) {
+export function PlanSection({ request }: Readonly<PlanSectionProps>) {
   const m = useMessages();
   const plan = useApiCall(requestPlan);
   const [plannedFor, setPlannedFor] = useState<PlanRequest | null>(null);

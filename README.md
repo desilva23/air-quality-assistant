@@ -157,7 +157,7 @@ Every phrase of the brief maps to a feature in [What it does](#what-it-does). Li
 
 ### Code quality
 
-- **TypeScript and lint:** strict TypeScript with `noUncheckedIndexedAccess` and five more strict flags. typescript-eslint `strictTypeChecked` and `stylisticTypeChecked` run with zero findings.
+- **TypeScript and lint:** strict TypeScript with `noUncheckedIndexedAccess` and five more strict flags. typescript-eslint `strictTypeChecked` and `stylisticTypeChecked`, and SonarJS (SonarQube's own JavaScript and TypeScript rules), run with zero findings on the app, tests and browser tests.
 - **No escape hatches:** no type assertions in `src/` except `as const` (`consistent-type-assertions: never`), no `any`, no non-null assertions, and no disabled lint rules.
 - **Limits:** functions under 80 lines, files under 250, complexity at most 10. Prettier at 100 columns, and Knip for unused code.
 - **Structure:** a pure domain layer, Zod contracts shared by server and browser, one typed client function per endpoint with typed error codes, and typed messages so the Tamil set can't miss a key.
@@ -204,7 +204,7 @@ Details are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 
 | Criterion | How it is addressed | Where to look |
 | --- | --- | --- |
-| Code quality | strictTypeChecked with zero findings; no casts, `any` or non-null assertions; files under 250 lines; pure domain; shared Zod contracts; typed errors | `src/lib/domain`, `src/lib/client/api.ts`, `eslint.config.mjs`, `tests/quality/hygiene.test.ts`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Code quality | strictTypeChecked and SonarJS with zero findings; no casts, `any` or non-null assertions; files under 250 lines; pure domain; shared Zod contracts; typed errors | `src/lib/domain`, `src/lib/client/api.ts`, `eslint.config.mjs`, `tests/quality/hygiene.test.ts`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Security | Server-only keys, same-origin + shared rate limit + size cap + Zod on every route, CSP nonce, prompt fencing, code-only errors, CodeQL | [SECURITY.md](SECURITY.md), `src/proxy.ts`, `src/lib/server/` |
 | Efficiency | Redis cache with `X-Cache: HIT`, parallel upstream calls with timeouts, AI only on request, memoised and lazy UI, Zod Mini in the browser | `src/lib/server/stores.ts`, `src/lib/air/report.ts`, `src/components/AssistantApp.tsx`, `src/lib/zod.ts` |
 | Testing | 248 unit and integration tests, 100% coverage enforced, 14 Playwright tests with axe, including the whole journey in Tamil | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |

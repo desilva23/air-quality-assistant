@@ -11,8 +11,8 @@ describe("geography", () => {
   });
 
   it("rounds coordinates to about a kilometre", () => {
-    expect(roundCoordinate(28.61394)).toBe(28.61);
-    expect(roundCoordinate(77.2099)).toBe(77.21);
+    expect(roundCoordinate(28.61394)).toBeCloseTo(28.61, 10);
+    expect(roundCoordinate(77.2099)).toBeCloseTo(77.21, 10);
   });
 
   it("measures great-circle distance", () => {

@@ -14,7 +14,7 @@ export interface StationsPanelProps {
   place: Place;
 }
 
-function StationsTable({ stations }: { stations: NearbyStation[] }) {
+function StationsTable({ stations }: Readonly<{ stations: NearbyStation[] }>) {
   const { stations: s, air } = useMessages();
   const labels = useLabels();
   const language = useLanguage();

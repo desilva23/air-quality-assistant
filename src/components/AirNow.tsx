@@ -13,7 +13,7 @@ export interface AirNowProps {
   aqi: AqiResult;
 }
 
-function SourceDetails({ reading }: { reading: Reading }) {
+function SourceDetails({ reading }: Readonly<{ reading: Reading }>) {
   const { air } = useMessages();
   const language = useLanguage();
   const where =

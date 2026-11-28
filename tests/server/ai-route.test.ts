@@ -10,7 +10,7 @@ const Output = z.object({ answer: z.string() });
 function post(body: string, headers: Record<string, string> = {}) {
   return new Request("http://localhost/api/ask", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-forwarded-for": "1.1.1.1", ...headers },
+    headers: { "content-type": "application/json", "x-forwarded-for": "192.0.2.1", ...headers },
     body,
   });
 }
@@ -66,7 +66,7 @@ describe("aiRoute", () => {
     ).toBe(403);
     const responses = await Promise.all(
       Array.from({ length: 11 }, () =>
-        POST(post('{"question":"a"}', { "x-forwarded-for": "7.7.7.7" })),
+        POST(post('{"question":"a"}', { "x-forwarded-for": "192.0.2.7" })),
       ),
     );
     expect(responses.map((r) => r.status)).toContain(429);

@@ -26,7 +26,7 @@ interface DoseBarProps {
   emphasis?: boolean;
 }
 
-function DoseBar({ label, cigarettes, widest, emphasis = false }: DoseBarProps) {
+function DoseBar({ label, cigarettes, widest, emphasis = false }: Readonly<DoseBarProps>) {
   return (
     <li className={emphasis ? "chosen" : undefined}>
       <span className="dose-label">{label}</span>

@@ -5,7 +5,7 @@ import { rejection } from "../support/fetch";
 
 const get = (query: string, headers: Record<string, string> = {}) =>
   new Request(`http://localhost/api/thing?${query}`, {
-    headers: { "x-forwarded-for": "2.2.2.2", ...headers },
+    headers: { "x-forwarded-for": "192.0.2.2", ...headers },
   });
 
 function route(run: (input: { q: string }) => Promise<{ items: string[] }>) {
