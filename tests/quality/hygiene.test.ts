@@ -106,6 +106,15 @@ describe("project hygiene", () => {
     expect(read(".gitignore")).toMatch(/^\.env$/m);
   });
 
+  it("reads settings in one module, so blank values mean unset everywhere", () => {
+    for (const file of source) {
+      if (file === "src/lib/server/config.ts") continue;
+      // NODE_ENV is Next's build flag, not a setting.
+      const code = read(file).replaceAll("process.env.NODE_ENV", "");
+      expect(code, file).not.toContain("process.env");
+    }
+  });
+
   it("documents how to run, test and deploy it", () => {
     const readme = read("README.md");
     for (const phrase of [

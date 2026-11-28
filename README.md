@@ -1,7 +1,7 @@
 # Urban Air Quality Assistant
 
 [![CI](https://github.com/desilva23/air-quality-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/desilva23/air-quality-assistant/actions/workflows/ci.yml)
-![Tests](https://img.shields.io/badge/tests-243%20unit%20%2B%2014%20e2e-2f6b45)
+![Tests](https://img.shields.io/badge/tests-248%20unit%20%2B%2014%20e2e-2f6b45)
 ![Coverage](https://img.shields.io/badge/coverage-100%25-2f6b45)
 ![a11y](https://img.shields.io/badge/axe-0%20violations-2f6b45)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
@@ -134,7 +134,7 @@ Requires Node 22.
 npm ci
 cp .env.example .env.local   # fill in the two keys; without them the app uses the CAMS model and built-in guidance
 npm run dev                  # http://localhost:3000
-npm run check                # format, strict lint, Knip, typecheck, 243 tests with 100% coverage
+npm run check                # format, strict lint, Knip, typecheck, 248 tests with 100% coverage
 npx playwright install chromium
 npm run test:e2e             # production build in Chromium: journeys, Tamil, CSP, axe in light and dark, 320 px reflow
 ```
@@ -147,7 +147,7 @@ npm run test:e2e             # production build in Chromium: journeys, Tamil, CS
 | `OPENAQ_API_KEY` | Measured station readings. Without it, readings come from the CAMS model. |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Set by Vercel's Upstash for Redis integration. These share the rate limit and cache across instances. |
 
-Add only these. The optional settings in `.env.example` are commented out on purpose: the defaults are right, and blank or placeholder values break the model choice and Redis. The region is `bom1` (Mumbai) in `vercel.json`. Details are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Add only these. All settings are read in `src/lib/server/config.ts`, and a blank value counts as unset. The region is `bom1` (Mumbai) in `vercel.json`. Details are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Quality
 
@@ -181,7 +181,7 @@ Every phrase of the brief maps to a feature in [What it does](#what-it-does). Li
 
 ### Testing
 
-- **Unit and integration:** 243 Vitest tests across the domain, air data, AI, server, client, UI, language and hygiene suites. The gate is 100% statement, branch, function and line coverage, enforced in CI.
+- **Unit and integration:** 248 Vitest tests across the domain, air data, AI, server, client, UI, language and hygiene suites. The gate is 100% statement, branch, function and line coverage, enforced in CI.
 - **Accessibility in tests:** axe runs in the component tests.
 - **Browser:** 14 Playwright tests on the production build cover the journeys, the map and simulators, the whole journey in Tamil, personalisation, persistence, CSP and headers, API refusals, axe in light and dark, and 320 px reflow.
 
@@ -207,7 +207,7 @@ Details are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 | Code quality | strictTypeChecked with zero findings; no casts, `any` or non-null assertions; files under 250 lines; pure domain; shared Zod contracts; typed errors | `src/lib/domain`, `src/lib/client/api.ts`, `eslint.config.mjs`, `tests/quality/hygiene.test.ts`, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Security | Server-only keys, same-origin + shared rate limit + size cap + Zod on every route, CSP nonce, prompt fencing, code-only errors, CodeQL | [SECURITY.md](SECURITY.md), `src/proxy.ts`, `src/lib/server/` |
 | Efficiency | Redis cache with `X-Cache: HIT`, parallel upstream calls with timeouts, AI only on request, memoised and lazy UI, Zod Mini in the browser | `src/lib/server/stores.ts`, `src/lib/air/report.ts`, `src/components/AssistantApp.tsx`, `src/lib/zod.ts` |
-| Testing | 243 unit and integration tests, 100% coverage enforced, 14 Playwright tests with axe, including the whole journey in Tamil | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |
+| Testing | 248 unit and integration tests, 100% coverage enforced, 14 Playwright tests with axe, including the whole journey in Tamil | [docs/TESTING.md](docs/TESTING.md), `tests/`, `e2e/` |
 | Accessibility | WCAG 2.2 AA target, axe in jsdom and Chromium (light and dark), reflow, preferences | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md), `src/app/styles/preferences.css` |
 | Problem statement alignment | Live data for any town in India, personal routines, indoor tips, alternatives, computed impacts, a what-if simulator, and English and Tamil | [What it does](#what-it-does), `src/lib/domain/impacts.ts`, `src/lib/domain/choices.ts`, `src/lib/i18n` |
 

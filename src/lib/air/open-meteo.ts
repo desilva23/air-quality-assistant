@@ -4,7 +4,13 @@ import "server-only";
 // when no monitoring station is near or fresh.
 
 import * as z from "../zod";
-import type { OutlookHour, Place, Reading } from "../domain/air";
+import {
+  OUTLOOK_HOURS,
+  PLACE_NAME_MAX,
+  type OutlookHour,
+  type Place,
+  type Reading,
+} from "../domain/air";
 import { isInIndia, type Coordinates } from "../domain/geo";
 import { fetchJson, UpstreamError, urlWith } from "./fetch-json";
 
@@ -70,7 +76,7 @@ export async function modelAir({ latitude, longitude }: Coordinates): Promise<Mo
       station: null,
       distanceKm: null,
     },
-    outlook: outlook.slice(0, 48),
+    outlook: outlook.slice(0, OUTLOOK_HOURS),
   };
 }
 
@@ -87,8 +93,8 @@ export async function searchPlaces(query: string): Promise<Place[]> {
   return results
     .filter((result) => result.country_code === "IN" && isInIndia(result))
     .map((result) => ({
-      name: result.name.slice(0, 80),
-      region: result.admin1?.slice(0, 80) ?? null,
+      name: result.name.slice(0, PLACE_NAME_MAX),
+      region: result.admin1?.slice(0, PLACE_NAME_MAX) ?? null,
       latitude: result.latitude,
       longitude: result.longitude,
     }));

@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import * as z from "../zod";
+import { redisCredentials, type RedisCredentials } from "./config";
 import { createRateLimiter, type RateLimitResult } from "./rate-limit";
 import { createTtlCache } from "./ttl-cache";
 
@@ -31,7 +32,6 @@ export interface StoreOptions<V> {
   schema: z.ZodMiniType<V>;
 }
 
-type Env = Record<string, string | undefined>;
 type Command = (string | number)[];
 type RunCommands = (commands: Command[]) => Promise<unknown[]>;
 
@@ -42,7 +42,7 @@ const PipelineReplySchema = z.array(
 );
 
 /** Sends Redis commands to Upstash's REST API in one round trip. */
-function upstash({ url, token }: { url: string; token: string }): RunCommands {
+function upstash({ url, token }: RedisCredentials): RunCommands {
   return async (commands) => {
     const response = await fetch(`${url.replace(/\/+$/, "")}/pipeline`, {
       method: "POST",
@@ -125,18 +125,13 @@ function memoryStores<V>(options: StoreOptions<V>) {
   };
 }
 
-/**
- * Upstash Redis when its URL and token are both set, memory otherwise. Vercel's
- * Upstash integration names them KV_REST_API_URL and KV_REST_API_TOKEN.
- */
+/** Upstash Redis when it is configured, memory otherwise. */
 export function createStores<V>(
   options: StoreOptions<V>,
-  env: Env = process.env,
+  redis: RedisCredentials | null = redisCredentials(),
   now: () => number = Date.now,
 ): { limiter: RateLimiter; cache: ResponseCache<V> } {
-  const url = env.UPSTASH_REDIS_REST_URL ?? env.KV_REST_API_URL;
-  const token = env.UPSTASH_REDIS_REST_TOKEN ?? env.KV_REST_API_TOKEN;
-  if (!url || !token) return memoryStores(options);
-  const run = upstash({ url, token });
+  if (!redis) return memoryStores(options);
+  const run = upstash(redis);
   return { limiter: redisRateLimiter(run, options, now), cache: redisCache(run, options) };
 }

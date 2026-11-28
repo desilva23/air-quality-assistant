@@ -7,6 +7,7 @@ import * as z from "../zod";
 import {
   MAX_CONCENTRATION,
   STATION_MAX_AGE_HOURS,
+  STATION_NAME_MAX,
   STATION_RADIUS_KM,
   type NearbyStation,
   type Reading,
@@ -116,7 +117,7 @@ export async function stationReading(
     measuredAt: pm25.datetime.utc,
     kind: "station",
     source: `OpenAQ (${location.provider?.name.slice(0, 50) ?? "monitoring network"})`,
-    station: location.name?.slice(0, 120) ?? null,
+    station: location.name?.slice(0, STATION_NAME_MAX) ?? null,
     distanceKm: kmRounded(km),
   };
 }
@@ -140,7 +141,7 @@ export async function nearbyStations(
       const pm25 = latestValue(location, await latestAt(location, options), "pm25", now);
       return pm25
         ? {
-            name: location.name?.slice(0, 120) ?? "",
+            name: location.name?.slice(0, STATION_NAME_MAX) ?? "",
             latitude: location.coordinates.latitude,
             longitude: location.coordinates.longitude,
             distanceKm: kmRounded(km),

@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { AiProviderError, AiResponseError } from "@/lib/ai/errors";
-import { groqComplete, modelFor } from "@/lib/ai/groq";
+import { groqComplete } from "@/lib/ai/groq";
 import type { Completion } from "@/lib/ai/llm";
 import { bodyOf, json, stubFetch } from "../support/fetch";
 
@@ -18,16 +18,6 @@ const reply = (content: unknown, finish = "stop") =>
   json({ choices: [{ message: { content }, finish_reason: finish }] });
 
 describe("Groq client", () => {
-  it("picks GPT-OSS models by tier, unless overridden", () => {
-    expect(modelFor("smart")).toBe("openai/gpt-oss-120b");
-    expect(modelFor("lite")).toBe("openai/gpt-oss-20b");
-    // A blank override means the default, not an empty model name.
-    vi.stubEnv("GROQ_MODEL", "  ");
-    expect(modelFor("smart")).toBe("openai/gpt-oss-120b");
-    vi.stubEnv("GROQ_LITE_MODEL", "llama-3.1-8b-instant");
-    expect(modelFor("lite")).toBe("llama-3.1-8b-instant");
-  });
-
   it("asks for strict structured output with reasoning tuned to the tier", async () => {
     const fetch = stubFetch(() => reply('{"ok":true}'));
     await expect(groqComplete(completion, "key")).resolves.toBe('{"ok":true}');
@@ -49,15 +39,14 @@ describe("Groq client", () => {
     });
   });
 
-  it("uses low reasoning for the lite tier and plain JSON schema for other models", async () => {
+  it("answers questions with the small model and low reasoning", async () => {
     const fetch = stubFetch(() => reply("{}"));
     await groqComplete({ ...completion, tier: "lite" }, "key");
-    expect(bodyOf(fetch.mock.calls[0]?.[1])).toMatchObject({ reasoning_effort: "low" });
-    vi.stubEnv("GROQ_MODEL", "llama-3.3-70b-versatile");
-    await groqComplete(completion, "key");
-    const body = bodyOf(fetch.mock.calls[1]?.[1]);
-    expect(body).not.toHaveProperty("reasoning_effort");
-    expect(body).toMatchObject({ response_format: { json_schema: { strict: false } } });
+    expect(bodyOf(fetch.mock.calls[0]?.[1])).toMatchObject({
+      model: "openai/gpt-oss-20b",
+      reasoning_effort: "low",
+      response_format: { json_schema: { strict: true } },
+    });
   });
 
   it("turns a refusal into a provider error with Groq's own message, trimmed", async () => {

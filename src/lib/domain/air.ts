@@ -5,10 +5,17 @@
 import * as z from "../zod";
 import { INDIA_BOUNDS } from "./geo";
 
+/** Longest place, region and station names kept; data sources' longer names are cut to fit. */
+export const PLACE_NAME_MAX = 80;
+export const STATION_NAME_MAX = 120;
+
+/** Hours of forecast kept, from the current hour. */
+export const OUTLOOK_HOURS = 48;
+
 export const PlaceSchema = z.object({
-  name: z.string().check(z.trim(), z.minLength(1), z.maxLength(80)),
+  name: z.string().check(z.trim(), z.minLength(1), z.maxLength(PLACE_NAME_MAX)),
   /** State or district, when known. */
-  region: z.nullable(z.string().check(z.maxLength(80))),
+  region: z.nullable(z.string().check(z.maxLength(PLACE_NAME_MAX))),
   latitude: z.number().check(z.gte(INDIA_BOUNDS.minLat), z.lte(INDIA_BOUNDS.maxLat)),
   longitude: z.number().check(z.gte(INDIA_BOUNDS.minLon), z.lte(INDIA_BOUNDS.maxLon)),
 });
@@ -36,7 +43,7 @@ const ReadingSchema = z.discriminatedUnion("kind", [
   z.object({
     ...readingBase,
     kind: z.literal("station"),
-    station: z.nullable(z.string().check(z.maxLength(120))),
+    station: z.nullable(z.string().check(z.maxLength(STATION_NAME_MAX))),
     distanceKm: Kilometres,
   }),
   z.object({ ...readingBase, kind: z.literal("model"), station: z.null(), distanceKm: z.null() }),
@@ -50,8 +57,8 @@ export type AirNote = (typeof AIR_NOTES)[number];
 
 export const AirReportSchema = z.object({
   reading: ReadingSchema,
-  /** Hourly PM2.5 forecast from the current hour, up to 48 hours. */
-  outlook: z.array(OutlookHourSchema).check(z.maxLength(48)),
+  /** Hourly PM2.5 forecast from the current hour. */
+  outlook: z.array(OutlookHourSchema).check(z.maxLength(OUTLOOK_HOURS)),
   outlookSource: z.nullable(z.string().check(z.maxLength(80))),
   /** Why the model stood in for a station, when it did. A code; the browser words it. */
   note: z.nullable(z.enum(AIR_NOTES)),
@@ -59,7 +66,7 @@ export const AirReportSchema = z.object({
 
 /** A monitoring station near the chosen place, with its latest PM2.5, for the map. */
 export const NearbyStationSchema = z.object({
-  name: z.string().check(z.maxLength(120)),
+  name: z.string().check(z.maxLength(STATION_NAME_MAX)),
   latitude: z.number().check(z.gte(-90), z.lte(90)),
   longitude: z.number().check(z.gte(-180), z.lte(180)),
   distanceKm: Kilometres,

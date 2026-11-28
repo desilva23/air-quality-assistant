@@ -18,6 +18,9 @@ export const PlanRequestSchema = z.object({
 
 export type PlanRequest = z.infer<typeof PlanRequestSchema>;
 
+/** Longest share message; the built-in plan cuts its own to fit. */
+export const SHARE_TEXT_MAX = 700;
+
 const text = (max: number) => z.string().check(z.trim(), z.minLength(1), z.maxLength(max));
 
 function planSchemaFor(impactId: z.ZodMiniType<ImpactId | null>) {
@@ -30,7 +33,7 @@ function planSchemaFor(impactId: z.ZodMiniType<ImpactId | null>) {
     indoor: items(4),
     alternatives: items(3),
     /** A short message for a family or housing-society group. No personal details. */
-    shareText: text(700),
+    shareText: text(SHARE_TEXT_MAX),
   });
 }
 

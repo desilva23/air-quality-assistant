@@ -1,15 +1,10 @@
 import "server-only";
 import { errorResponse } from "../api-errors";
+import { trustedProxyHops } from "./config";
 import type { RateLimiter } from "./stores";
 
 /** API responses are personal and change by the minute, so nothing in between may keep them. */
 export const NO_STORE = { "Cache-Control": "no-store" } as const;
-
-/** TRUSTED_PROXY_HOPS as a whole number of at least 1; anything else means 1. */
-export function trustedProxyHops(env: Record<string, string | undefined> = process.env): number {
-  const hops = Number(env.TRUSTED_PROXY_HOPS ?? 1);
-  return Number.isInteger(hops) ? Math.max(1, hops) : 1;
-}
 
 /**
  * The client's address, for rate limiting. Each proxy appends the address it

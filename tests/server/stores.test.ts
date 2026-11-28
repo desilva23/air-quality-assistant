@@ -13,7 +13,7 @@ const options = {
   maxEntries: 2,
   schema: z.object({ n: z.number() }),
 };
-const redisEnv = { KV_REST_API_URL: "https://redis.example/", KV_REST_API_TOKEN: "token" };
+const redis = { url: "https://redis.example/", token: "token" };
 
 describe("in-memory rate limiter", () => {
   it("allows the limit per window, then says how long to wait", () => {
@@ -58,7 +58,7 @@ describe("in-memory cache", () => {
 
 describe("createStores without Redis", () => {
   it("keeps limits and answers in memory", async () => {
-    const { limiter, cache } = createStores(options, {});
+    const { limiter, cache } = createStores(options, null);
     expect(await limiter.check("a")).toEqual({ ok: true });
     await cache.set("k", { n: 1 });
     expect(await cache.get("k")).toEqual({ n: 1 });
@@ -72,7 +72,7 @@ describe("createStores with Upstash Redis", () => {
 
   it("counts per hashed client and window in one round trip", async () => {
     const fetch = stubFetch(() => json([{ result: 3 }, { result: 1 }]));
-    const { limiter } = createStores(options, redisEnv, () => 90_000);
+    const { limiter } = createStores(options, redis, () => 90_000);
     expect(await limiter.check("1.2.3.4")).toEqual({ ok: false, retryAfterSeconds: 30 });
     const [url, init] = fetch.mock.calls[0] ?? [];
     expect(url).toBe("https://redis.example/pipeline");
@@ -84,7 +84,7 @@ describe("createStores with Upstash Redis", () => {
 
   it("allows requests under the limit", async () => {
     stubFetch(() => json([{ result: 1 }, { result: 1 }]));
-    expect(await createStores(options, redisEnv).limiter.check("a")).toEqual({ ok: true });
+    expect(await createStores(options, redis).limiter.check("a")).toEqual({ ok: true });
   });
 
   it("stores answers with an expiry and validates what it reads back", async () => {
@@ -92,10 +92,7 @@ describe("createStores with Upstash Redis", () => {
       const command = (bodyOf(init) as string[][])[0]?.[0];
       return json([{ result: command === "GET" ? JSON.stringify({ n: 7 }) : "OK" }]);
     });
-    const { cache } = createStores(options, {
-      UPSTASH_REDIS_REST_URL: "https://r.example",
-      UPSTASH_REDIS_REST_TOKEN: "t",
-    });
+    const { cache } = createStores(options, { url: "https://r.example", token: "t" });
     await cache.set("k", { n: 7 });
     expect(bodyOf(fetch.mock.calls[0]?.[1])).toEqual([
       ["SET", "aqa:test:cache:k", '{"n":7}', "PX", 1000],
@@ -105,14 +102,14 @@ describe("createStores with Upstash Redis", () => {
 
   it("treats a missing or malformed cached value as a miss", async () => {
     stubFetch(() => json([{ result: null }]));
-    expect(await createStores(options, redisEnv).cache.get("k")).toBeUndefined();
+    expect(await createStores(options, redis).cache.get("k")).toBeUndefined();
     stubFetch(() => json([{ result: '{"n":"seven"}' }]));
-    expect(await createStores(options, redisEnv).cache.get("k")).toBeUndefined();
+    expect(await createStores(options, redis).cache.get("k")).toBeUndefined();
   });
 
   it("keeps the app running when Redis fails, and logs why", async () => {
     stubFetch(() => json({}, 500));
-    const stores = createStores(options, redisEnv);
+    const stores = createStores(options, redis);
     expect(await stores.limiter.check("a")).toEqual({ ok: true });
     expect(await stores.cache.get("k")).toBeUndefined();
     await expect(stores.cache.set("k", { n: 1 })).resolves.toBeUndefined();

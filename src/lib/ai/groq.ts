@@ -20,18 +20,13 @@ const ReplySchema = z.object({
 
 const ErrorBodySchema = z.object({ error: z.object({ message: z.string() }) });
 
-/** An unset or blank variable means "use the default". (`??` alone would keep "".) */
-function envOr(name: string, fallback: string): string {
-  const value = process.env[name]?.trim();
-  if (!value) return fallback;
-  return value;
-}
+/** OpenAI's open-weight GPT-OSS models on Groq: the large one plans, the small one answers. */
+const MODEL: Record<ModelTier, string> = {
+  smart: "openai/gpt-oss-120b",
+  lite: "openai/gpt-oss-20b",
+};
 
-export function modelFor(tier: ModelTier): string {
-  return tier === "smart"
-    ? envOr("GROQ_MODEL", "openai/gpt-oss-120b")
-    : envOr("GROQ_LITE_MODEL", "openai/gpt-oss-20b");
-}
+const REASONING_EFFORT: Record<ModelTier, "medium" | "low"> = { smart: "medium", lite: "low" };
 
 /**
  * The chat completion Groq is asked for. GPT-OSS models support strict
@@ -39,23 +34,19 @@ export function modelFor(tier: ModelTier): string {
  * room for both.
  */
 function chatRequest(request: Completion) {
-  const id = modelFor(request.tier);
-  const gptOss = id.startsWith("openai/gpt-oss");
   return {
-    model: id,
+    model: MODEL[request.tier],
     messages: [
       { role: "system", content: request.system },
       { role: "user", content: request.prompt },
     ],
     temperature: request.temperature,
     max_completion_tokens: MAX_COMPLETION_TOKENS,
-    ...(gptOss && {
-      reasoning_effort: request.tier === "smart" ? "medium" : "low",
-      include_reasoning: false,
-    }),
+    reasoning_effort: REASONING_EFFORT[request.tier],
+    include_reasoning: false,
     response_format: {
       type: "json_schema",
-      json_schema: { name: request.name, schema: request.jsonSchema, strict: gptOss },
+      json_schema: { name: request.name, schema: request.jsonSchema, strict: true },
     },
   };
 }

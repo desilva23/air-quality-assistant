@@ -5,7 +5,6 @@ import {
   jsonResponse,
   readLimitedBody,
   refusal,
-  trustedProxyHops,
 } from "@/lib/server/request";
 
 const request = (headers: Record<string, string>, body?: BodyInit) =>
@@ -24,13 +23,8 @@ describe("client address", () => {
     expect(clientKey(request({}), 1)).toBe("anonymous");
   });
 
-  it("reads TRUSTED_PROXY_HOPS as a whole number of at least one", () => {
-    expect(trustedProxyHops({})).toBe(1);
-    expect(trustedProxyHops({ TRUSTED_PROXY_HOPS: "2" })).toBe(2);
-    expect(trustedProxyHops({ TRUSTED_PROXY_HOPS: "0" })).toBe(1);
-    expect(trustedProxyHops({ TRUSTED_PROXY_HOPS: "abc" })).toBe(1);
-    expect(trustedProxyHops()).toBe(1);
-    expect(clientKey(request({ "x-forwarded-for": "1.1.1.1" }))).toBe("1.1.1.1");
+  it("trusts one proxy hop by default, as on Vercel", () => {
+    expect(clientKey(request({ "x-forwarded-for": "6.6.6.6, 1.1.1.1" }))).toBe("1.1.1.1");
   });
 });
 

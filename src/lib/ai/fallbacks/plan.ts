@@ -8,7 +8,13 @@ import { isOpenAirMode, type PartOfDay } from "../../domain/household";
 import type { ImpactId } from "../../domain/impacts";
 import { assessSituation, type Situation } from "../../domain/situation";
 import { LABELS, listPhrase, type Labels } from "../../i18n/labels";
-import type { Plan, PlanItem, PlanReply, PlanRequest } from "../contracts";
+import {
+  SHARE_TEXT_MAX,
+  type Plan,
+  type PlanItem,
+  type PlanReply,
+  type PlanRequest,
+} from "../contracts";
 import { FALLBACK_COPY, type FallbackCopy } from "./copy";
 import { alternativeItems, indoorItems } from "./plan-items";
 
@@ -109,7 +115,7 @@ function shareText(ctx: Ctx, plan: Omit<Plan, "shareText">): string {
   const tips = [...plan.routine.morning, ...plan.indoor, ...plan.alternatives]
     .slice(0, 3)
     .map((item) => `• ${item.action}`);
-  return [lead, ...tips].join("\n").slice(0, 700);
+  return [lead, ...tips].join("\n").slice(0, SHARE_TEXT_MAX);
 }
 
 export function contextFor(request: PlanRequest): Ctx {

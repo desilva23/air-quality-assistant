@@ -17,14 +17,14 @@ Last local run: 26 November 2026.
 | --- | --- | --- | --- |
 | Domain rules | `tests/domain` | 71 | Passed |
 | Air data clients and report | `tests/air` | 26 | Passed |
-| AI contracts, prompts, client and fallbacks | `tests/ai` | 38 | Passed |
-| Route factories, guards, stores, CSP | `tests/server` | 31 | Passed |
+| AI contracts, prompts, client and fallbacks | `tests/ai` | 37 | Passed |
+| Route factories, guards, settings, stores, CSP | `tests/server` | 36 | Passed |
 | API routes and app shell | `tests/app` | 8 | Passed |
 | Browser client, saved settings, location | `tests/client` | 15 | Passed |
 | UI flows with axe | `tests/ui` | 41 | Passed |
 | English and Tamil wording | `tests/i18n` | 5 | Passed |
-| Project hygiene | `tests/quality` | 8 | Passed |
-| **Unit and integration total** | | **243** | **All passed** |
+| Project hygiene | `tests/quality` | 9 | Passed |
+| **Unit and integration total** | | **248** | **All passed** |
 | End to end in real Chromium | `e2e/` | 14 | All passed |
 
 | Coverage (`src/`) | Result | Enforced in CI |
@@ -48,4 +48,4 @@ Last local run: 26 November 2026.
 | API routes | 403 cross-site, 415, 413 declared and streamed, 400, 429 with `Retry-After`, 503 on data failure, cache hits, fallbacks, no user text in logs |
 | UI | Sample household to plan to answer, search, retry, stale-plan notice, form edits, copy message, language switch, stations map and table, what-if slider, commute table, axe on every panel |
 | End to end | The journeys on the production build, the map and simulators, the whole journey in Tamil with axe, two households getting different plans, persistence across reload, a fresh nonce on every script, injected markup blocked, security headers, axe in light and dark, no sideways scroll at 320 px, skip link |
-| Hygiene | Required docs exist, files stay small, no `any`, no HTML injection, no browser logging, no secrets, keys stay on the server |
+| Hygiene | Required docs exist, files stay small, no `any`, no HTML injection, no browser logging, no secrets, keys stay on the server, settings read in one module |
