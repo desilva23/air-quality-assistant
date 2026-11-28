@@ -1,11 +1,10 @@
 import "server-only";
-import { createHash } from "node:crypto";
 import type * as z from "../zod";
 import { errorResponse } from "../api-errors";
 import { envelopeOf, type AiEnvelope, type FallbackNotice } from "../ai/contracts";
 import { AiProviderError, AiUnavailableError } from "../ai/errors";
 import { jsonResponse, NO_STORE, readLimitedBody, refusal } from "./request";
-import { createStores } from "./stores";
+import { cacheKey, createStores } from "./stores";
 
 const MAX_BODY_BYTES = 32_000;
 /** Model calls spend quota, so each client gets ten a minute on each AI route. */
@@ -76,7 +75,7 @@ export function aiRoute<I, O>({ name, input, output, run, fallback }: AiRouteOpt
     const data = await readInput(request, input);
     if (data instanceof Response) return data;
 
-    const key = createHash("sha256").update(JSON.stringify(data)).digest("hex");
+    const key = cacheKey(data);
     const cached = await cache.get(key);
     if (cached) return jsonResponse(cached, { cached: true });
     try {

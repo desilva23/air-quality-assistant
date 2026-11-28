@@ -9,6 +9,11 @@ import { createTtlCache } from "./ttl-cache";
 // is per server instance. With Upstash Redis configured they are shared, so
 // limits hold however many instances are running.
 
+/** The cache key for a validated request: a hash, so no request content is stored as a key. */
+export function cacheKey(input: unknown): string {
+  return createHash("sha256").update(JSON.stringify(input)).digest("hex");
+}
+
 export interface RateLimiter {
   check(key: string): Promise<RateLimitResult>;
 }

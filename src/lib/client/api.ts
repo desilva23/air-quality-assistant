@@ -97,12 +97,14 @@ export function searchPlaces(query: PlacesQuery, options?: RequestOptions): Prom
   return request({ path, schema: PlacesReplySchema, timeoutMs: DATA_TIMEOUT_MS }, options);
 }
 
+/** A point as a query string, rounded so nearby visitors share the server's cache entry. */
+function pointQuery({ latitude, longitude }: Coordinates): string {
+  const lat = String(roundCoordinate(latitude));
+  return new URLSearchParams({ lat, lon: String(roundCoordinate(longitude)) }).toString();
+}
+
 export function fetchAir(point: Coordinates, options?: RequestOptions): Promise<AirReport> {
-  const params = new URLSearchParams({
-    lat: String(roundCoordinate(point.latitude)),
-    lon: String(roundCoordinate(point.longitude)),
-  });
-  const path = `/api/air?${params.toString()}`;
+  const path = `/api/air?${pointQuery(point)}`;
   return request({ path, schema: AirReportSchema, timeoutMs: DATA_TIMEOUT_MS }, options);
 }
 
@@ -110,11 +112,7 @@ export function fetchStations(
   point: Coordinates,
   options?: RequestOptions,
 ): Promise<StationsReply> {
-  const params = new URLSearchParams({
-    lat: String(roundCoordinate(point.latitude)),
-    lon: String(roundCoordinate(point.longitude)),
-  });
-  const path = `/api/stations?${params.toString()}`;
+  const path = `/api/stations?${pointQuery(point)}`;
   return request({ path, schema: StationsReplySchema, timeoutMs: DATA_TIMEOUT_MS }, options);
 }
 

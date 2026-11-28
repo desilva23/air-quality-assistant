@@ -1,9 +1,8 @@
 import "server-only";
-import { createHash } from "node:crypto";
 import type * as z from "../zod";
 import { errorResponse } from "../api-errors";
 import { jsonResponse, NO_STORE, refusal } from "./request";
-import { createStores } from "./stores";
+import { cacheKey, createStores } from "./stores";
 
 /** Lookups are cheap but hit outside services, so each client gets thirty a minute per route. */
 const DATA_REQUESTS_PER_MINUTE = 30;
@@ -41,7 +40,7 @@ export function dataRoute<I, O>({ name, query, output, run, ttlMs }: DataRouteOp
     const parsed = query.safeParse(params);
     if (!parsed.success) return errorResponse("INVALID_INPUT", NO_STORE);
 
-    const key = createHash("sha256").update(JSON.stringify(parsed.data)).digest("hex");
+    const key = cacheKey(parsed.data);
     const cached = await cache.get(key);
     if (cached) return jsonResponse(cached, { cached: true });
     try {
